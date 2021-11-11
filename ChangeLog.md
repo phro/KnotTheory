@@ -1,3 +1,3 @@
-# Changelog for knot-theory
+# Changelog for knotTheory
 
 ## Unreleased changes

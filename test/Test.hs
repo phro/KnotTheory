@@ -1,5 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-module Test where
+module Main where
 import Control.Exception
 import Control.Monad
 import Test.HUnit
@@ -22,16 +22,24 @@ assertException preface expected action = do
     Just msg -> assertFailure (preface ++ ": " ++ msg)
 
 main = runTestTT tests
+
 tests :: Test
 tests = TestList [ helperFunctionTests
                  , xingTests
                  , knotObjectTests
+                 , knotObjectConversionHelperTests
                  , knotObjectConversionTests
                  ]
 
 helperFunctionTests = "Helper functions" ~: TestList
-  [ "mergeBy merges dictionaries with sum" ~:
-      mergeBy sum [('i',1),('i',2),('j',3)] ~?= [('i',3),('j',3)]
+  [ "mergeBy merges dictionaries with sum" ~: TestList $
+      [ mergeBy sum [('i',1),('i',2),('j',3)] ~?= [('i',3),('j',3)]
+      , mergeBy sum [('i',1),('i',2),('j',3),('i',-3)] ~?= [('i',0),('j',3)]
+      , mergeBy sum [] ~?= ([] :: [(Int,Int)])
+      ]
+  , "mergeBy merges dictionaries with concat" ~:
+      mergeBy concat [(1,[1,11,111]),(2,[2,22,222]),(1,[-1,-11])] ~?=
+        [(1,[1,11,111,-1,-11]),(2,[2,22,222])]
   ]
 
 xingTests = "Xing properties" ~: TestList
@@ -53,6 +61,14 @@ xingTests = "Xing properties" ~: TestList
       sign (Xm 1 2) ~?= -1
   -- , "Sign of Xv" ~:
       -- sign (Xv 1 2) ~?= 0
+  , "otherArc produces the other arc" ~: TestList
+      [ otherArc (Xp 1 2) 1 ~?= Just 2
+      , otherArc (Xp 1 2) 2 ~?= Just 1
+      , otherArc (Xp 1 2) 3 ~?= Nothing
+      , otherArc (Xm 1 2) 1 ~?= Just 2
+      , otherArc (Xm 1 2) 2 ~?= Just 1
+      , otherArc (Xm 1 2) 3 ~?= Nothing
+      ]
   ]
 
 knotObjectTests = "KnotObject operations" ~: TestList
@@ -73,11 +89,11 @@ knotObjectTests = "KnotObject operations" ~: TestList
   , "nextComponentIndex behaves well at 'end' of Loop" ~:
       nextComponentIndex 2 (Loop [1,2]) ~?= Just 1
   , "nextSkeletonIndex works on strand" ~:
-      nextSkeletonIndex 1 (skeleton $ SX [Strand [1,2], Loop [3,4]] []) ~?= Just 2
+      nextSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 1 ~?= Just 2
   , "nextSkeletonIndex fails on end of strand" ~:
-      nextSkeletonIndex 2 (skeleton $ SX [Strand [1,2], Loop [3,4]] []) ~?= Nothing
+      nextSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 2 ~?= Nothing
   , "nextSkeletonIndex passes on end of loop after first strand" ~:
-      nextSkeletonIndex 4 (skeleton $ SX [Strand [1,2], Loop [3,4]] []) ~?= Just 3
+      nextSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 4 ~?= Just 3
   , "prev works on finite list" ~:
       prev 2 [1,2] ~?= Just 1
   , "prev fails at end of list" ~:
@@ -95,11 +111,11 @@ knotObjectTests = "KnotObject operations" ~: TestList
   , "prevComponentIndex behaves well at 'beginning' of Loop" ~:
       prevComponentIndex 1 (Loop [1,2]) ~?= Just 2
   , "prevSkeletonIndex works on strand" ~:
-      prevSkeletonIndex 2 (skeleton $ SX [Strand [1,2], Loop [3,4]] []) ~?= Just 1
+      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 2 ~?= Just 1
   , "prevSkeletonIndex fails on beginning of strand" ~:
-      prevSkeletonIndex 1 (skeleton $ SX [Strand [1,2], Loop [3,4]] []) ~?= Nothing
+      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 1 ~?= Nothing
   , "prevSkeletonIndex passes on end of loop after first strand" ~:
-      prevSkeletonIndex 3 (skeleton $ SX [Strand [1,2], Loop [3,4]] []) ~?= Just 4
+      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 3 ~?= Just 4
   , "isHeadOf passes for head" ~:
       isHeadOf 1 [1,2] ~?= True
   , "isHeadOf fails for nonhead" ~:
@@ -136,35 +152,168 @@ knotObjectTests = "KnotObject operations" ~: TestList
       isLastOfComponent 1 (Loop [1,2]) ~?= False
   , "isLastOfComponent fails for nonelement" ~:
       isLastOfComponent 3 (Loop [1,2]) ~?= False
-  , "findNextXing finds next Xing" ~: TestList
+  , "findNextXing finds next Xing" ~: TestList $
       zipWith
         (\d x -> findNextXing
           (SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]) d
           ~?= Just x
         )
-                  [(1,Out), (2,Out), (3,In), (6,Out), (1,In)]
-        (map Just [Xp 1 4 , Xp 2 5 , Xp 5 2, Xp 3 6 , Xp 3 6])
+        [(1,Out), (2,Out), (3,In), (6,Out), (1,In)]
+        [Xp 1 4 , Xp 5 2 , Xp 5 2, Xp 3 6 , Xp 3 6]
+  , "findNextXing fails to find next Xing" ~: TestList $
+    map
+      (let k = SX [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+        in \d -> (findNextXing k d ~?= Nothing)
       )
+    [(1,In), (7,In), (7,Out)]
   ]
 
 testRVTs :: [KnotObject Int]
-testRVTs = [ RVT -- (long) trefoil TODO: verify
+testRVTs = [ RVT
+               [Strand [1]]
+               []
+               [(1,1)]
+           , RVT --  trefoil
                [Strand [1,2,3,4,5,6]]
-               [Xp 1 4, Xp 5 2, Xp 3 6]
-               [(1,0),(2,0),(3,0),(4,-1),(5,0),(6,0)]
-           , RVT -- (closed) trefoil TODO: verify
-               [Loop [1,2,3,4,5,6]]
                [Xp 1 4, Xp 5 2, Xp 3 6]
                [(1,1),(2,0),(3,0),(4,-1),(5,0),(6,0)]
+           , RVT 
+               [Strand [1,3], Loop [2,4]]
+               [Xp 1 2, Xp 4 3]
+               [(1,1),(2,-1),(3,0),(4,0)]
            ]
 
-testSXs = [ SX -- (long) trefoil TODO: verify
+testSXs = [ SX 
+               [Strand [1]]
+               []
+           , SX -- (closed) trefoil
                [Strand [1,2,3,4,5,6]]
                [Xp 1 4, Xp 5 2, Xp 3 6]
-           , SX -- (closed) trefoil TODO: verify
-               [Loop [1,2,3,4,5,6]]
-               [Xp 1 4, Xp 5 2, Xp 3 6]
+           , SX
+               [Strand [1,3], Loop [2,4]]
+               [Xp 1 2, Xp 4 3]
            ]
+
+
+knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: TestList
+  [ "absorbXing absorbs xing attached to first element of front" ~: TestList $
+    [ TestList $ zipWith3
+        (let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+          in \f x rf -> absorbXing k x f ~?= rf
+        )
+        (map return [(1,Out), (1,In), (2,Out),(2, In)])
+        [Xp 1 4, Xp 3 6, Xp 5 2, Xp 1 4]
+        [ ([]     ,[(5,Out),(2,Out),(4,In )])
+        , ([]     ,[(4,Out),(6,In ),(3,In )])
+        , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
+        , ([(4,1)],[(4,In ),(1,In ),(5,Out)])
+        ]
+    , TestList $ zipWith3
+        (let k = SX [Loop [1,2,3,4,5,6]] [Xm 4 1, Xm 2 5, Xm 6 3]
+          in \f x rf -> absorbXing k x f ~?= rf
+        )
+        (map return [(1,Out), (1,In), (2,Out),(2, In)])
+        [Xm 4 1, Xm 6 3, Xm 2 5, Xm 4 1]
+        [ ([]     ,[(5,Out),(2,Out),(4,In )])
+        , ([]     ,[(4,Out),(6,In ),(3,In )])
+        , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
+        , ([(4,1)],[(4,In ),(1,In ),(5,Out)])
+        ]
+    ]
+  , "advanceFront works when xing present" ~: TestList $
+    zipWith
+      (let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+        in \f rf -> advanceFront k f ~?= rf
+      )
+      (map return [(1,Out), (1,In), (2,Out)])
+      [ ([]     ,[(5,Out),(2,Out),(4,In )])
+      , ([]     ,[(4,Out),(6,In ),(3,In )])
+      , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
+      ]
+  , "(>>= advanceFront) chains properly" ~: TestList $
+      [ "(>>= advanceFront)" ~: TestList $ zipWith
+          ( \f rf ->
+            let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+             in (f >>= advanceFront k) ~?= rf
+          )
+          [ ([(1,1)],[(1,Out)])
+          , ([(1,1)],[(2,Out),(1,In),(1,Out),(2,In)])
+          ]
+          [ ([(1,1)],[(5,Out),(2,Out),(4,In)])
+          , ([(1,1),(2,-1)],[(1,In),(1,Out)])
+          ]
+      , "(>>= advanceFront)^○2" ~: TestList $ zipWith
+          ( \f rf ->
+            let k = SX [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+             in (f >>= advanceFront k >>= advanceFront k) ~?= rf
+          )
+          [ ([(1,1)],[(1,In),(1,Out)])
+          , ([(1,1)],[(2,Out),(1,In),(1,Out),(2,In)])
+          , ([(1,1)],[(1,In),(2,Out),(1,Out),(2,In)])
+          ]
+          [ ([(1,1)],[])
+          , ([(1,1),(2,-1)],[])
+          ]
+      , "(>>= advanceFront) Hopf link" ~: TestList $ zipWith
+          ( \f rf ->
+            let k = SX [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
+             in (f >>= advanceFront k) ~?= rf
+          )
+          [ ([(1,1)],[(1,Out)])
+          , ([(2,1)],[(2,Out)])
+          ]
+          [ ([(1,1)],      [(4,Out),(3,Out),(2,In)])
+          , ([(2,1),(1,1)],[(1,In),(4,Out),(3,Out)])
+          ]
+      , "(>>= advanceFront)^n (Hopf link)" ~: TestList $
+          zipWith (~?=)
+            ( take 6 $ iterate
+                ( let k = SX [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
+                   in (>>= advanceFront k)
+                )
+                ([(1,1)],[(1,Out)])
+            )
+            [ ([(1,1)],[(1,Out)])
+            , ([(1,1)],[(4,Out),(3,Out),(2,In)])
+            , ([(1,1)],[(2,Out),(3,In),(3,Out),(2,In)])
+            , ([(1,1),(2,-1)],[(3,In),(3,Out)])
+            , ([(1,1),(2,-1)],[])
+            , ([(1,1),(2,-1)],[])
+            ]
+    ]
+  , "advanceFront works when arc connects back to front" ~: TestList $
+      [ TestList $ zipWith
+          (let k = SX [Loop [1]] []
+            in \f rf -> advanceFront k f ~?= rf
+          )
+          [ [(1,Out), (1,In )]
+          , [(1,In ), (1,Out)]
+          , [(2,Out), (1, In), (2,In ), (3, Out)]
+          , [(2,In ), (1, In), (2,Out), (3, Out)]
+          ]
+          [ ([(1,-1)] ,[])
+          , ([]       ,[])
+          , ([(2,-1)] ,[(1,In), (3, Out)])
+          , ([]       ,[(1,In), (3, Out)])
+          ]
+      , TestList $ zipWith
+          (let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+            in \f rf -> advanceFront k f ~?= rf
+          )
+          [ [(1,Out), (1,In )]
+          , [(1,In ), (1,Out)]
+          , [(2,Out), (1, In), (2,In ), (3, Out)]
+          ]
+          [ ([(1,-1)] ,[])
+          , ([]       ,[])
+          , ([(2,-1)] ,[(1,In), (3, Out)])
+          ]
+      ]
+  , "getRotNums tests" ~: TestList
+      [ getRotNums (SX [Loop [1]] []) [(1,In ),(1,Out)] ~?= []
+      , getRotNums (SX [Loop [1]] []) [(1,Out),(1,In )] ~?= [(1,-1)]
+      ]
+  ]
 
 -- NB: Conversion program cycles are expected to produce an equivalent knot
 -- diagram, not and identical knot program. Keep this in mind if a test fails.
@@ -198,11 +347,11 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
           map (\s -> (toRVT . toRVT) s ~?= toRVT s) testSXs
       ]
   , "toRVT returns classical kinks" ~: TestList $
-    [ TestList $ map (\s -> let rs = map snd . rotnums $ s
-        in let m = minimum rs
-            in -1 <= m ~? "nonusual negative kink detected:" ++ show m
+    [ TestList $ map (\s -> let rs = map snd . rotnums . toRVT $ s
+                                m = minimum rs
+       in -1 <= m ~? "nonusual negative kink detected:" ++ show m
                      ) testSXs
-    , TestList $ map (\s -> let rs = map snd . rotnums $ s
+    , TestList $ map (\s -> let rs = map snd . rotnums . toRVT $ s
         in let m = maximum rs
             in m <= 1 ~? "nonusual positive kink detected:" ++ show m
                      ) testSXs
@@ -223,17 +372,17 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
       map (\s -> (xings . toRVT) s == xings s ~? "xings do not match"
           ) testSXs
     ]
-  , "toRVT does not add a rotation number to terminal arcs" ~: TestList $
-      map (\s -> let
-          r = toRVT s
-          rs = rotnums r
+  -- , "toRVT does not add a rotation number to terminal arcs" ~: TestList $
+      -- map (\s -> let
+          -- r = toRVT s
+          -- rs = rotnums r
 
-          getEndpointsOfSkeleton :: Skeleton a -> [a]
-          getEndpointsOfSkeleton = concat . map getEndpointsOfComponent
+          -- getEndpointsOfSkeleton :: Skeleton a -> [a]
+          -- getEndpointsOfSkeleton = concat . map getEndpointsOfComponent
 
-          getEndpointsOfComponent :: Component a -> [a]
-          getEndpointsOfComponent (Loop   _ ) = []
-          getEndpointsOfComponent (Strand is) = [head is, last is]
-                  in True ~=? (and $ map ((== Just 0) . flip lookup rs) (getEndpointsOfSkeleton . skeleton $ r))
-          ) testSXs
+          -- getEndpointsOfComponent :: Component a -> [a]
+          -- getEndpointsOfComponent (Loop   _ ) = []
+          -- getEndpointsOfComponent (Strand is) = [head is, last is]
+                  -- in True ~=? (and $ map ((== Just 0) . flip lookup rs) (getEndpointsOfSkeleton . skeleton $ r))
+          -- ) testSXs
   ]

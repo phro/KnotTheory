@@ -16,7 +16,7 @@
                   -- ) where
 module KnotTheory where
 import Data.Maybe (listToMaybe, catMaybes)
-import Data.List (find, groupBy, delete)
+import Data.List (find, groupBy, sortOn, delete, deleteBy)
 import Data.Function (on)
 
 data Xing i = Xp i i | Xm i i -- | Xv i i
@@ -64,11 +64,19 @@ data KnotObject i = SX { skeleton :: Skeleton i
                         deriving (Show, Eq)
 
 -- -- TODO: Implement show instance for rotnums. Alternatively, define a function:
+-- rotnum :: (Eq i) => KnotObject i -> i -> Maybe Int
+-- rotnum k i = fmap snd . find (\ir -> fst ir == i) $ rotnums k
+
 rotnum :: (Eq i) => KnotObject i -> i -> Maybe Int
 rotnum k i = fmap snd . find (\ir -> fst ir == i) $ rotnums k
 
--- Question: what value should rotnums return for undefined indices? Perhaps it
--- should be a Maybe-wrapped value? For now, let's choose 0.
+isStrand :: Component i -> Bool
+isStrand (Strand _) = True
+isStrand _          = False
+
+isLoop :: Component i -> Bool
+isLoop (Loop _) = True
+isLoop _        = False
 
 toList :: Component i -> [i]
 toList (Strand is) = is
@@ -95,25 +103,27 @@ Xm i j `involves` k = i == k || j == k
   -- | k == j     = Just i
   -- | otherwise = Nothing
 
-otherArc :: (Eq i) => Xing i -> i -> i
-otherArc (Xm i j) k
-  | k == i     = j
-  | otherwise = i
-otherArc (Xp i j) k
-  | k == i     = j
-  | otherwise = i
+otherArc :: (Eq i) => Xing i -> i -> Maybe i
+otherArc x i
+  | i == o     = Just u
+  | i == u     = Just o
+  | otherwise = Nothing
+  where o = overStrand x
+        u = underStrand x
 
 next :: (Eq i) => i -> Strand i -> Maybe i
-next _ [] = Nothing
+next _ []  = Nothing
+next _ [_] = Nothing
 next i (x:y:ys)
   | i == x = Just y
   | otherwise = next i (y:ys)
 
 prev :: (Eq i) => i -> Strand i -> Maybe i
-prev _ [] = Nothing
+prev _ []  = Nothing
+prev _ [_] = Nothing
 prev i (x:y:ys)
   | i == y = Just x
-  | otherwise = next i (y:ys)
+  | otherwise = prev i (y:ys)
 -- next e = listToMaybe . drop 1 . dropWhile (/= e)
 
 nextCyc :: (Eq i) => i -> Loop i -> Maybe i
@@ -147,84 +157,108 @@ isLastOfComponent :: (Eq i) => i -> Component i -> Bool
 isLastOfComponent _ (Loop   _ ) = False
 isLastOfComponent i (Strand is) = i `isLastOf` is
 
-isTerminalIndex :: (Eq i) => i -> Skeleton i -> Bool
-isTerminalIndex i cs = or $
-  map (\c -> i `isHeadOfComponent` c || i `isLastOfComponent` c) cs
+isTerminalOfComponent :: (Eq i) => Component i -> i ->  Bool
+isTerminalOfComponent c i = i `isHeadOfComponent` c || i `isLastOfComponent` c
 
-nextSkeletonIndex :: (Eq i) => i -> Skeleton i -> Maybe i
-nextSkeletonIndex i = listToMaybe . catMaybes . map (nextComponentIndex i)
+isTerminalIndex :: (Eq i) => Skeleton i -> i ->  Bool
+isTerminalIndex cs i = or $ map (flip isTerminalOfComponent i) cs
 
-prevSkeletonIndex :: (Eq i) => i -> Skeleton i -> Maybe i
-prevSkeletonIndex i = listToMaybe . catMaybes . map (prevComponentIndex i)
+nextSkeletonIndex :: (Eq i) => Skeleton i -> i -> Maybe i
+nextSkeletonIndex s i = listToMaybe . catMaybes . map (nextComponentIndex i) $ s
 
-mergeBy :: (Eq i) => ([a] -> b) -> [(i,a)] -> [(i,b)]
-mergeBy f = map (wrapIndex f) . (groupBy ((==) `on` fst))
+prevSkeletonIndex :: (Eq i) => Skeleton i -> i -> Maybe i
+prevSkeletonIndex s i = listToMaybe . catMaybes . map (prevComponentIndex i) $ s
+
+{-
+ - Assumptions:
+ -   1. k is a (1,n)-tangle (a tangle with only one open component)
+ -   2. k is a planar diagram.
+ -   3. k is a connected diagram.
+ - toRVT outputs:
+ -   1. a planar diagram.
+ -   2. if any subset of components are closed, the diagram remains planar.
+ -}
+
+δ :: (Eq a) => a -> a -> Int
+δ x y
+  | x == y     = 1
+  | otherwise = 0
+
+toRVT :: (Ord i) => KnotObject i -> KnotObject i
+toRVT r@(RVT _ _ _) = r
+toRVT k@(SX cs xs) = RVT cs xs rs where
+  rs = mergeBy sum $
+    getRotNums k [(i1,Out)] ++ [ (i, δ i i1) | i <- strandIndices k ]
+  i1 = head . toList $ s
+  Just s = find isStrand cs
+
+mergeBy :: (Ord i) => ([a] -> b) -> [(i,a)] -> [(i,b)]
+mergeBy f = map (wrapIndex f) . groupBy ((==) `on` fst) . sortOn fst
   where
     wrapIndex :: ([a] -> b) -> [(i,a)] -> (i,b)
     wrapIndex f xs@(x:ys) = (fst x, f . map snd $ xs)
+
+getRotNums :: (Eq i) => KnotObject i -> Front i -> [(i,Int)]
+getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return
+
+advanceFront :: (Eq i) => KnotObject i -> Front i -> ([(i,Int)], Front i)
+advanceFront _ []           = return []
+advanceFront k f@((i,d):fs) =
+  case find ((== i) . fst) fs of
+    Just (i,In ) -> ([(i,-1)], fs')
+    Just (i,Out) -> return fs'
+    Nothing      -> 
+      case findNextXing k (i,d) of
+        Just x  -> absorbXing k x f
+        Nothing -> return fs
+  where fs' = deleteBy ((==) `on` fst) (i,d) fs
+  -- where fs' = delete id' fs
+
+f =  let k = SX [Loop [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
+      in (>>= advanceFront k)
+
+absorbXing :: (Eq i) => KnotObject i -> Xing i -> Front i -> ([(i,Int)],Front i)
+absorbXing k x ((i,d):fs) =
+  case d of
+    Out
+      | isPositive x == (i == underStrand x) ->
+        (f [(j,1)],f [(j ,In ),(i',Out),(j',Out)] ++ fs)
+      | otherwise ->
+        return $ f [(j',Out),(i',Out),(j ,In )] ++ fs
+      where
+        i' = nextSkeletonIndex s i
+        j  = otherArc x i
+        j' = j >>= nextSkeletonIndex s
+    In
+      | isPositive x == (i' == Just (overStrand x)) ->
+        (f [(j,1)],f [(j ,In ),(i',In),(j',Out)] ++ fs)
+      | otherwise ->
+        return $ f [(j',Out),(i',In),(j ,In )] ++ fs
+      where
+        i' = prevSkeletonIndex s i
+        j  = i' >>= otherArc x
+        j' = j  >>= nextSkeletonIndex s
+  where
+    f  = catMaybes . (map deMaybe)
+    s  = skeleton k
+    
+data Dir = In | Out
+  deriving (Eq, Show)
+-- There should be cleaner functions to deal with xings and their associated
+-- strands.
 
 type Front i = [(i,Dir)]
 
 findNextXing :: (Eq i) => KnotObject i -> (i,Dir) -> Maybe (Xing i)
 findNextXing k (i,Out) = find (`involves` i) $ xings k
 findNextXing k (i,In ) = do
-  i' <- prevSkeletonIndex i $ skeleton k
+  i' <- prevSkeletonIndex (skeleton k) i
   find (`involves` i') $ xings k
   -- (prevSkeletonIndex i $ skeleton k) >>= (\i' -> find (`involves` i') $ xings k)
 
-getNewFront :: (Eq i) => KnotObject i -> (i,Dir) -> Maybe (Xing i) -> (Front i,(i,Int))
-getNewFront _ (_,Out) Nothing = ([],[])
-getNewFront _ (i,In ) Nothing = ([],[(i,1)])
-getNewFront k (i,Out) Just x
-  | isPositive x == (i == underStrand x) = ([(j,In),(i',Out),(j',In)],(j,1))
-getNewFront k (i,In ) Just x = _
-
-modifyFront :: (Eq i) => KnotObject i -> (i,Dir) -> (Front i,(i,Int))
-modifyFront k f = getNewFront f $ findNextXing k f
-
-data Dir = In | Out
-  deriving (Eq, Show)
-
-{-
- - Assumptions:
- -   1. k is a link (with no open components)
- -   2. k is a planar diagram.
- -   3. k is a connected diagram.
- - toRVT outputs:
- -   1. a pure RVT.
- -   2. a planar diagram.
- -   2. if any subset of components are closed, the diagram remains planar.
- -}
-toRVT :: (Eq i) => KnotObject i -> KnotObject i
-toRVT r@(RVT _ _ _) = r
-toRVT k@(SX cs xs) = RVT cs xs rs where
-  rs = mergeBy sum $ getRotNums [(i1,In),(i1,Out)] $
-    map (\i -> (i,0)) . strandIndices $ k
-  i1 = head . toList . head $ cs
-  getRotNums :: (Eq i) => Front i ->  [(i,Int)] -> [(i,Int)]
-  getRotNums             []         rs        = rs
-  getRotNums             (id:is) rs =
-    case find (((==) `on` fst) id) is of
-      Just id' ->
-        getRotNums
-          (delete id' is)
-          (case snd id of
-              Out -> rs
-              In -> (fst id,1):rs
-          )
-      Nothing -> let (f,rs') = modifyFront k id in
-        getRotNums (f++ is) rs'
-    -- case find (((==) `on` fst) id) is of
-      -- Nothing ->
-        -- getRotNums
-          -- (deleteBy ((==) `on` fst) id is)
-          -- (case snd id of
-              -- Out -> rs
-              -- In -> mergeBy sum $ (fst id,1):rs
-          -- )
-      -- Just id' -> let (f,rs') = _ k id' in
-        -- getRotNums (f++ is) rs'
-
+deMaybe :: (Maybe a, b) -> Maybe (a, b)
+deMaybe (Nothing, _) = Nothing
+deMaybe (Just x, y) = Just (x, y)
 
 strandIndices :: KnotObject i -> [i]
 strandIndices = concat . map toList . skeleton
@@ -240,4 +274,3 @@ isRVT _         = False
 toSX :: KnotObject i -> KnotObject i
 toSX k@(SX _ _) = k
 toSX (RVT cs xs _) = SX cs xs
-
