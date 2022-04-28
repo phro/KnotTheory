@@ -3,4 +3,7 @@
 *.o
 *.bak
 *.cabal
+*.lock
+*.tix
+dist*
 *~
