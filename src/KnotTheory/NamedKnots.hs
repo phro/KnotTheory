@@ -53,7 +53,7 @@ allLinks :: [SX Int]
 allLinks = map snd namedLinks
 
 namedObjectsFromTo :: (Enum i) => [(NamedKnot,SX i)] -> Int -> Int -> [SX i]
-namedObjectsFromTo xs l u = map (snd) .
+namedObjectsFromTo xs l u = map snd .
   dropWhile ((< l) . xingNum . fst) . takeWhile ((<= u) . xingNum . fst) $ xs
     where xingNum (x, _, _) = x
 
