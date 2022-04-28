@@ -4,7 +4,9 @@ import Control.Exception
 import Control.Monad
 import Test.HUnit
 
-import KnotTheory
+import KnotTheory.PD
+import KnotTheory.NamedKnots
+import KnotTheory.MetaHopf
 
 assertException :: (Exception e, Eq e) => String -> e -> IO a -> IO ()
 assertException preface expected action = do
@@ -29,6 +31,7 @@ tests = TestList [ helperFunctionTests
                  , knotObjectTests
                  , knotObjectConversionHelperTests
                  , knotObjectConversionTests
+                 , namedKnotsTests
                  ]
 
 helperFunctionTests = "Helper functions" ~: TestList
@@ -44,13 +47,13 @@ helperFunctionTests = "Helper functions" ~: TestList
 
 xingTests = "Xing properties" ~: TestList
   [ "Xp isPositive?" ~:
-      (isPositive (Xp 1 2)) ~?= True
+      isPositive (Xp 1 2) ~?= True
   , "Xm is Positive?" ~:
-      (isPositive (Xm 1 2)) ~?= False
+      isPositive (Xm 1 2) ~?= False
   , "Xp is Negative?" ~:
-      (isNegative (Xp 1 2)) ~?= False
+      isNegative (Xp 1 2) ~?= False
   , "Xm is Negative?" ~:
-      (isNegative (Xm 1 2)) ~?= True
+      isNegative (Xm 1 2) ~?= True
   -- , "Xv is Positive?" ~:
       -- (isPositive (Xv 1 2)) ~?= False
   -- , "Xv is Negative?" ~:
@@ -163,12 +166,12 @@ knotObjectTests = "KnotObject operations" ~: TestList
   , "findNextXing fails to find next Xing" ~: TestList $
     map
       (let k = SX [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
-        in \d -> (findNextXing k d ~?= Nothing)
+        in \d -> findNextXing k d ~?= Nothing
       )
     [(1,In), (7,In), (7,Out)]
   ]
 
-testRVTs :: [KnotObject Int]
+testRVTs :: [RVT Int]
 testRVTs = [ RVT
                [Strand [1]]
                []
@@ -176,14 +179,14 @@ testRVTs = [ RVT
            , RVT --  trefoil
                [Strand [1,2,3,4,5,6]]
                [Xp 1 4, Xp 5 2, Xp 3 6]
-               [(1,1),(2,0),(3,0),(4,-1),(5,0),(6,0)]
-           , RVT 
+               [(1,0),(2,0),(3,0),(4,-1),(5,0),(6,0)]
+           , RVT
                [Strand [1,3], Loop [2,4]]
                [Xp 1 2, Xp 4 3]
-               [(1,1),(2,-1),(3,0),(4,0)]
+               [(1,0),(2,-1),(3,0),(4,0)]
            ]
 
-testSXs = [ SX 
+testSXs = [ SX
                [Strand [1]]
                []
            , SX -- (closed) trefoil
@@ -318,20 +321,11 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
 -- NB: Conversion program cycles are expected to produce an equivalent knot
 -- diagram, not and identical knot program. Keep this in mind if a test fails.
 knotObjectConversionTests = "KnotObject conversions" ~: TestList
-  [ "isSX reads KnotObjects properly" ~: TestList $
-      [ TestList $ map (\s -> isSX s ~?= True) testSXs
-      , TestList $ map (\r -> isSX r ~?= False) testRVTs
-      ]
-  , "isRVT reads KnotObjects properly" ~: TestList $
-      [ TestList $ map (\r -> isRVT r ~?= True) testRVTs
-      , TestList $ map (\s -> isRVT s ~?= False) testSXs
-      ]
-  , "toSX returns SX" ~: TestList $
-      map (\s -> (isSX . toSX) s ~? "toSX did not return an SX") $ testSXs++testRVTs
-  , "toRVT returns RVT" ~: TestList $
-      map (\s -> (isRVT . toRVT) s ~? "toRVT did not return an RVT") $ testSXs++testRVTs
-  , "toSX . toRVT == id" ~: TestList $
-      map (\s -> (toSX . toRVT) s ~?= s) testSXs
+  [ "toSX . toRVT == id" ~: TestList
+    [ TestList $ map (\s -> (toSX . toRVT) s ~?= s) testSXs
+    , TestList $ map (\s -> (toSX . toRVT) s ~?= s) allKnots
+    , TestList $ map (\s -> (toSX . toRVT) s ~?= s) allLinks
+    ]
   , "toRVT . toSX == id" ~: TestList $
       map (\r -> (toRVT . toSX) r ~?= r) testRVTs
   , "toSX is idempotent" ~: TestList
@@ -385,4 +379,19 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
           -- getEndpointsOfComponent (Strand is) = [head is, last is]
                   -- in True ~=? (and $ map ((== Just 0) . flip lookup rs) (getEndpointsOfSkeleton . skeleton $ r))
           -- ) testSXs
+  ]
+
+namedKnotsTests = "Named knots/ links tests" ~: TestList
+  [ "Named knot lookup makes sense" ~:
+      knot 3 True 1 ~?= SX [Strand[1, 2, 3, 4, 5, 6]] [Xm 4 1, Xm 6 3, Xm 2 5]
+  , "Named knot fails appropriately" ~:
+      knot 3 True (-1) ~?= SX [] [] -- this should fail
+  , "Named link lookup makes sense" ~:
+      link 2 True 1 ~?= SX [Loop[1, 2], Loop[3, 4]] [Xm 1 4, Xm 3 2]
+  , "Named link fails appropriately" ~:
+      link 2 True (-1) ~?= SX [] [] -- this should fail
+  ]
+
+metaHopfTests = "Meta-Hopf algebra tests" ~: TestList
+  [ toMetaHopfExpression (RVT [Loop[1 :: Int]] [] [(1,0)]) ~?= [Unit 1]
   ]

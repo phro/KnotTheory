@@ -1,7 +1,7 @@
 name:                knotTheory
 version:             0.1.0.0
 github:              "phro/knotTheory"
-license:             GPL3
+license:             GPL-3
 author:              "Jesse Frohlich"
 maintainer:          "frohlich@math.toronto.edu"
 copyright:           "2021 Jesse Frohlich"
@@ -24,26 +24,31 @@ dependencies:
 
 library:
   source-dirs: src
+  exposed-modules:
+    - KnotTheory.PD
+    - KnotTheory.NamedKnots
+    - KnotTheory.MetaHopf
 
-# executables:
-  # knotTheory-exe:
-    # main:                Main.hs
-    # source-dirs:         app
-    # ghc-options:
-    # - -threaded
-    # - -rtsopts
-    # - -with-rtsopts=-N
-    # dependencies:
-    # - knotTheory
-
-tests:
-  knotTheory-test:
-    main:                Test.hs
-    source-dirs:         test
+executables:
+  knotTheory-exe:
+    main:                Main.hs
+    source-dirs:         app
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - knotTheory
-    - HUnit
+
+tests:
+  knotTheory-test:
+    main:                Test.hs
+    source-dirs:
+      - test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - knotTheory
+      - HUnit

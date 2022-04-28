@@ -1,28 +1,20 @@
--- module KnotTheory ( Xing (Xp, Xm, Xv)
-                  -- , KnotObject (SX, RVT)
-                  -- , Component (Strand, Loop)
-                  -- , Strand
-                  -- , Loop
-                  -- , isPositive
-                  -- , isNegative
-                  -- , sign
-                  -- , skeleton
-                  -- , xings
-                  -- , rotnums
-                  -- , toSX
-                  -- , toRVT
-                  -- , isRVT
-                  -- , isSX
-                  -- ) where
-module KnotTheory where
-import Data.Maybe (listToMaybe, catMaybes)
+{-# LANGUAGE DeriveFunctor #-}
+module KnotTheory.PD where
+import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
 import Data.List (find, groupBy, sortOn, delete, deleteBy)
 import Data.Function (on)
 
-data Xing i = Xp i i | Xm i i -- | Xv i i
-  deriving (Eq, Show)
+type Index = Int
+data Xing i = Xp i i | Xm i i-- | Xv i i
+  deriving (Eq, Show, Functor)
 
-sign :: (Integral b) => Xing i -> b
+-- instance Functor Xing where
+  -- fmap f x =
+    -- case x of
+      -- Xp i j -> Xp (f i) (f j)
+      -- Xm i j -> Xm (f i) (f j)
+
+sign :: (Integral b) => Xing Index -> b
 sign (Xp _ _) = 1
 sign (Xm _ _) = -1
 -- sign (Xv _ _) = 0
@@ -51,24 +43,57 @@ type Loop i = [i]
 type Skeleton i = [Component i]
 
 data Component i = Strand (Strand i) | Loop (Loop i)
-  deriving (Eq, Show)
+  deriving (Eq, Show, Functor)
 
-data KnotObject i = SX { skeleton :: Skeleton i
-                       , xings :: [Xing i]
-                       }
-                  | RVT { skeleton :: Skeleton i
-                        , xings :: [Xing i]
-                        , rotnums :: [(i,Int)]
-                        -- , rotnums :: i -> Int
-                        }
-                        deriving (Show, Eq)
+-- Q. Is it important to require these conversion programs for *any* knot object?
+class KnotObject k where
+  toSX  :: (Ord i, Enum i) => k i -> SX i
+  toRVT :: (Ord i, Enum i) => k i -> RVT i
+  toRVT = toRVT . toSX
 
--- -- TODO: Implement show instance for rotnums. Alternatively, define a function:
--- rotnum :: (Eq i) => KnotObject i -> i -> Maybe Int
+class PD k where
+  skeleton :: k i -> Skeleton i
+  xings :: k i -> [Xing i]
+
+data SX  i = SX  (Skeleton i) [Xing i] deriving (Show, Eq, Functor)
+data RVT i = RVT (Skeleton i) [Xing i] [(i,Int)] deriving (Show, Eq, Functor)
+
+reindex :: (PD k, Functor k, Eq i) => k i -> k Int
+reindex k = fmap (fromJust . flip lookup table) k
+  where
+    table = zip (strandIndices s) [1..]
+    s = skeleton k
+
+-- data SX  = SX (Skeleton Index) [Xing Index] deriving (Show, Eq)
+-- data RVT = RVT (Skeleton Index) [Xing Index] [(Index,Int)] deriving (Show, Eq)
+
+instance KnotObject SX where
+  toSX = id
+  toRVT k@(SX cs xs) = RVT cs xs rs where
+    rs = mergeBy sum $ (i1,1): getRotNums k [(i1,Out)]
+        -- ++ [ (i, 0) | i <- strandIndices cs ]
+        -- ++ [ (i, δ i i1) | i <- strandIndices cs ]
+    i1 = head . toList $ s
+    Just s = find isStrand cs
+
+instance KnotObject RVT where
+  toRVT = id
+  toSX (RVT s xs _) = SX s xs
+
+instance PD SX where
+  skeleton (SX s _) = s
+  xings (SX _ xs)   = xs
+
+instance PD RVT where
+  skeleton (RVT s _ _) = s
+  xings (RVT _ xs _)   = xs
+
+rotnums :: RVT i -> [(i,Int)]
+rotnums (RVT _ _ rs) = rs
+
+rotnum :: (Eq i) => RVT i -> i -> Int
 -- rotnum k i = fmap snd . find (\ir -> fst ir == i) $ rotnums k
-
-rotnum :: (Eq i) => KnotObject i -> i -> Maybe Int
-rotnum k i = fmap snd . find (\ir -> fst ir == i) $ rotnums k
+rotnum k i = fromMaybe 0 . lookup i . rotnums $ k
 
 isStrand :: Component i -> Bool
 isStrand (Strand _) = True
@@ -81,6 +106,9 @@ isLoop _        = False
 toList :: Component i -> [i]
 toList (Strand is) = is
 toList (Loop is)   = is
+
+strandIndices :: Skeleton i -> [i]
+strandIndices = concatMap toList
 
 -- involves :: (Eq i) => Skeleton i -> Xing i -> i -> Bool
 -- involves s x i = or $ map (Just i==)
@@ -161,13 +189,13 @@ isTerminalOfComponent :: (Eq i) => Component i -> i ->  Bool
 isTerminalOfComponent c i = i `isHeadOfComponent` c || i `isLastOfComponent` c
 
 isTerminalIndex :: (Eq i) => Skeleton i -> i ->  Bool
-isTerminalIndex cs i = or $ map (flip isTerminalOfComponent i) cs
+isTerminalIndex cs i = any (`isTerminalOfComponent` i) cs
 
 nextSkeletonIndex :: (Eq i) => Skeleton i -> i -> Maybe i
-nextSkeletonIndex s i = listToMaybe . catMaybes . map (nextComponentIndex i) $ s
+nextSkeletonIndex s i = listToMaybe . mapMaybe (nextComponentIndex i) $ s
 
 prevSkeletonIndex :: (Eq i) => Skeleton i -> i -> Maybe i
-prevSkeletonIndex s i = listToMaybe . catMaybes . map (prevComponentIndex i) $ s
+prevSkeletonIndex s i = listToMaybe . mapMaybe (prevComponentIndex i) $ s
 
 {-
  - Assumptions:
@@ -175,8 +203,7 @@ prevSkeletonIndex s i = listToMaybe . catMaybes . map (prevComponentIndex i) $ s
  -   2. k is a planar diagram.
  -   3. k is a connected diagram.
  - toRVT outputs:
- -   1. a planar diagram.
- -   2. if any subset of components are closed, the diagram remains planar.
+ -   1. a planar (1,n)-rotational virtual tangle
  -}
 
 δ :: (Eq a) => a -> a -> Int
@@ -184,13 +211,7 @@ prevSkeletonIndex s i = listToMaybe . catMaybes . map (prevComponentIndex i) $ s
   | x == y     = 1
   | otherwise = 0
 
-toRVT :: (Ord i) => KnotObject i -> KnotObject i
-toRVT r@(RVT _ _ _) = r
-toRVT k@(SX cs xs) = RVT cs xs rs where
-  rs = mergeBy sum $
-    getRotNums k [(i1,Out)] ++ [ (i, δ i i1) | i <- strandIndices k ]
-  i1 = head . toList $ s
-  Just s = find isStrand cs
+-- toRVT k = toRVT . toSX $ k
 
 mergeBy :: (Ord i) => ([a] -> b) -> [(i,a)] -> [(i,b)]
 mergeBy f = map (wrapIndex f) . groupBy ((==) `on` fst) . sortOn fst
@@ -198,16 +219,18 @@ mergeBy f = map (wrapIndex f) . groupBy ((==) `on` fst) . sortOn fst
     wrapIndex :: ([a] -> b) -> [(i,a)] -> (i,b)
     wrapIndex f xs@(x:ys) = (fst x, f . map snd $ xs)
 
-getRotNums :: (Eq i) => KnotObject i -> Front i -> [(i,Int)]
+type Front i = [(i,Dir)]
+
+getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
 getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return
 
-advanceFront :: (Eq i) => KnotObject i -> Front i -> ([(i,Int)], Front i)
+advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront _ []           = return []
 advanceFront k f@((i,d):fs) =
   case find ((== i) . fst) fs of
-    Just (i,In ) -> ([(i,-1)], fs')
+    Just (i,In ) -> (return (i,-1), fs')
     Just (i,Out) -> return fs'
-    Nothing      -> 
+    Nothing      ->
       case findNextXing k (i,d) of
         Just x  -> absorbXing k x f
         Nothing -> return fs
@@ -217,7 +240,7 @@ advanceFront k f@((i,d):fs) =
 f =  let k = SX [Loop [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
       in (>>= advanceFront k)
 
-absorbXing :: (Eq i) => KnotObject i -> Xing i -> Front i -> ([(i,Int)],Front i)
+absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
 absorbXing k x ((i,d):fs) =
   case d of
     Out
@@ -239,17 +262,15 @@ absorbXing k x ((i,d):fs) =
         j  = i' >>= otherArc x
         j' = j  >>= nextSkeletonIndex s
   where
-    f  = catMaybes . (map deMaybe)
+    f  = mapMaybe deMaybe
     s  = skeleton k
-    
+
 data Dir = In | Out
   deriving (Eq, Show)
 -- There should be cleaner functions to deal with xings and their associated
 -- strands.
 
-type Front i = [(i,Dir)]
-
-findNextXing :: (Eq i) => KnotObject i -> (i,Dir) -> Maybe (Xing i)
+findNextXing :: (Eq i, PD k, KnotObject k) => k i -> (i,Dir) -> Maybe (Xing i)
 findNextXing k (i,Out) = find (`involves` i) $ xings k
 findNextXing k (i,In ) = do
   i' <- prevSkeletonIndex (skeleton k) i
@@ -259,18 +280,3 @@ findNextXing k (i,In ) = do
 deMaybe :: (Maybe a, b) -> Maybe (a, b)
 deMaybe (Nothing, _) = Nothing
 deMaybe (Just x, y) = Just (x, y)
-
-strandIndices :: KnotObject i -> [i]
-strandIndices = concat . map toList . skeleton
-
-isSX :: KnotObject i -> Bool
-isSX (SX _ _) = True
-isSX _      = False
-
-isRVT :: KnotObject i -> Bool
-isRVT (RVT _ _ _) = True
-isRVT _         = False
-
-toSX :: KnotObject i -> KnotObject i
-toSX k@(SX _ _) = k
-toSX (RVT cs xs _) = SX cs xs
