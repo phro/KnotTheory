@@ -2,6 +2,7 @@
 module KnotTheory.PD where
 import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
 import Data.List (find, groupBy, sortOn, delete, deleteBy)
+import Data.Tuple (swap)
 import Data.Function (on)
 
 type Index = Int
@@ -70,9 +71,9 @@ reindex k = fmap (fromJust . flip lookup table) k
 instance KnotObject SX where
   toSX = id
   toRVT k@(SX cs xs) = RVT cs xs rs where
-    rs = mergeBy sum $ (i1,1): getRotNums k [(i1,Out)]
+    rs = mergeBy sum $ getRotNums k [(i1,Out)]
         -- ++ [ (i, 0) | i <- strandIndices cs ]
-        -- ++ [ (i, δ i i1) | i <- strandIndices cs ]
+        ++ [ (i, δ i i1) | i <- strandIndices cs ]
     i1 = head . toList $ s
     Just s = find isStrand cs
 
@@ -262,7 +263,7 @@ absorbXing k x ((i,d):fs) =
         j  = i' >>= otherArc x
         j' = j  >>= nextSkeletonIndex s
   where
-    f  = mapMaybe deMaybe
+    f  = mapMaybe (fmap swap . sequence . swap)
     s  = skeleton k
 
 data Dir = In | Out
@@ -276,7 +277,3 @@ findNextXing k (i,In ) = do
   i' <- prevSkeletonIndex (skeleton k) i
   find (`involves` i') $ xings k
   -- (prevSkeletonIndex i $ skeleton k) >>= (\i' -> find (`involves` i') $ xings k)
-
-deMaybe :: (Maybe a, b) -> Maybe (a, b)
-deMaybe (Nothing, _) = Nothing
-deMaybe (Just x, y) = Just (x, y)

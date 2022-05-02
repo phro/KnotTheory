@@ -37,8 +37,8 @@ instance (Show i) => MMA (RVT i) where
 
 openFirstStrand :: SX i -> SX i
 openFirstStrand (SX (c:cs) xs) = SX cs' xs
-  where cs' = loop2Strand c : cs
-        loop2Strand (Loop x) = Strand x
+  where cs' = Strand (toList c) : cs
+openFirstStrand _              = undefined
 
 main :: IO ()
 -- main = putStrLn $ "rvks = " ++ (toMMA . map toRVT) allKnots
