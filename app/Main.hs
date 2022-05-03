@@ -38,7 +38,7 @@ instance (Show i) => MMA (RVT i) where
 openFirstStrand :: SX i -> SX i
 openFirstStrand (SX (c:cs) xs) = SX cs' xs
   where cs' = Strand (toList c) : cs
-openFirstStrand _              = undefined
+openFirstStrand _              = error "knot object has no strands"
 
 main :: IO ()
 -- main = putStrLn $ "rvks = " ++ (toMMA . map toRVT) allKnots

@@ -1,7 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Main where
 import Control.Exception
-import Control.Monad
+-- import Control.Monad
 import Test.HUnit
 
 import KnotTheory.PD
@@ -23,6 +24,7 @@ assertException preface expected action = do
     Nothing -> return ()
     Just msg -> assertFailure (preface ++ ": " ++ msg)
 
+main :: IO Counts
 main = runTestTT tests
 
 tests :: Test
@@ -34,138 +36,142 @@ tests = TestList [ helperFunctionTests
                  , namedKnotsTests
                  ]
 
+helperFunctionTests :: Test
 helperFunctionTests = "Helper functions" ~: TestList
   [ "mergeBy merges dictionaries with sum" ~: TestList $
-      [ mergeBy sum [('i',1),('i',2),('j',3)] ~?= [('i',3),('j',3)]
-      , mergeBy sum [('i',1),('i',2),('j',3),('i',-3)] ~?= [('i',0),('j',3)]
-      , mergeBy sum [] ~?= ([] :: [(Int,Int)])
+      [ mergeBy @_ @Int sum [('i',1),('i',2),('j',3)] ~?= [('i',3),('j',3)]
+      , mergeBy @_ @Int sum [('i',1),('i',2),('j',3),('i',-3)] ~?=
+          [('i',0),('j',3)]
+      , mergeBy @Int @Int sum [] ~?= []
       ]
   , "mergeBy merges dictionaries with concat" ~:
-      mergeBy concat [(1,[1,11,111]),(2,[2,22,222]),(1,[-1,-11])] ~?=
+      mergeBy @Int @[Int] concat [(1,[1,11,111]),(2,[2,22,222]),(1,[-1,-11])] ~?=
         [(1,[1,11,111,-1,-11]),(2,[2,22,222])]
   ]
 
+xingTests :: Test
 xingTests = "Xing properties" ~: TestList
   [ "Xp isPositive?" ~:
-      isPositive (Xp 1 2) ~?= True
+      isPositive (Xp @Int 1 2)  ~?= True
   , "Xm is Positive?" ~:
-      isPositive (Xm 1 2) ~?= False
+      isPositive (Xm @Int 1 2) ~?= False
   , "Xp is Negative?" ~:
-      isNegative (Xp 1 2) ~?= False
+      isNegative (Xp @Int 1 2)  ~?= False
   , "Xm is Negative?" ~:
-      isNegative (Xm 1 2) ~?= True
+      isNegative (Xm @Int 1 2)  ~?= True
   -- , "Xv is Positive?" ~:
       -- (isPositive (Xv 1 2)) ~?= False
   -- , "Xv is Negative?" ~:
       -- (isNegative (Xv 1 2)) ~?= False
   , "Sign of Xp" ~:
-      sign (Xp 1 2) ~?= 1
+      sign @Int (Xp 1 2 :: Xing Int) ~?= 1
   , "Sign of Xp" ~:
-      sign (Xm 1 2) ~?= -1
+      sign @Int (Xm 1 2) ~?= -1
   -- , "Sign of Xv" ~:
       -- sign (Xv 1 2) ~?= 0
   , "otherArc produces the other arc" ~: TestList
-      [ otherArc (Xp 1 2) 1 ~?= Just 2
-      , otherArc (Xp 1 2) 2 ~?= Just 1
-      , otherArc (Xp 1 2) 3 ~?= Nothing
-      , otherArc (Xm 1 2) 1 ~?= Just 2
-      , otherArc (Xm 1 2) 2 ~?= Just 1
-      , otherArc (Xm 1 2) 3 ~?= Nothing
+      [ otherArc (Xp 1 2) 1 ~?= Just @Int 2
+      , otherArc (Xp 1 2) 2 ~?= Just @Int 1
+      , otherArc (Xp 1 2) 3 ~?= Nothing @Int
+      , otherArc (Xm 1 2) 1 ~?= Just @Int 2
+      , otherArc (Xm 1 2) 2 ~?= Just @Int 1
+      , otherArc (Xm 1 2) 3 ~?= Nothing @Int
       ]
   ]
 
+knotObjectTests :: Test
 knotObjectTests = "KnotObject operations" ~: TestList
   [ "next works on finite list" ~:
-      next 1 [1,2] ~?= Just 2
+      next 1 [1,2] ~?= Just @Int 2
   , "next fails at end of list" ~:
-      next 2 [1,2] ~?= Nothing
+      next 2 [1,2] ~?= Nothing @Int
   , "next fails with invalid index" ~:
-      next 3 [1,2] ~?= Nothing
+      next 3 [1,2] ~?= Nothing @Int
   , "nextCyc works on finite list" ~:
-      nextCyc 1 [1,2] ~?= Just 2
+      nextCyc 1 [1,2] ~?= Just @Int 2
   , "nextCyc works at end of list" ~:
-      nextCyc 2 [1,2] ~?= Just 1
+      nextCyc 2 [1,2] ~?= Just @Int 1
   , "nextCyc fails with invalid index" ~:
-      nextCyc 3 [1,2] ~?= Nothing
+      nextCyc 3 [1,2] ~?= Nothing @Int
   , "nextComponentIndex behaves well at end of Strand" ~:
-      nextComponentIndex 2 (Strand [1,2]) ~?= Nothing
+      nextComponentIndex 2 (Strand @Int [1,2]) ~?= Nothing
   , "nextComponentIndex behaves well at 'end' of Loop" ~:
-      nextComponentIndex 2 (Loop [1,2]) ~?= Just 1
+      nextComponentIndex 2 (Loop @Int [1,2]) ~?= Just 1
   , "nextSkeletonIndex works on strand" ~:
-      nextSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 1 ~?= Just 2
+      nextSkeletonIndex (skeleton $ SX @Int [Strand [1,2], Loop [3,4]] []) 1 ~?= Just 2
   , "nextSkeletonIndex fails on end of strand" ~:
-      nextSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 2 ~?= Nothing
+      nextSkeletonIndex (skeleton $ SX @Int [Strand [1,2], Loop [3,4]] []) 2 ~?= Nothing
   , "nextSkeletonIndex passes on end of loop after first strand" ~:
-      nextSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 4 ~?= Just 3
+      nextSkeletonIndex (skeleton $ SX @Int [Strand [1,2], Loop [3,4]] []) 4 ~?= Just 3
   , "prev works on finite list" ~:
-      prev 2 [1,2] ~?= Just 1
+      prev 2 [1,2] ~?= Just @Int 1
   , "prev fails at end of list" ~:
-      prev 1 [1,2] ~?= Nothing
+      prev 1 [1,2] ~?= Nothing @Int
   , "prev fails with invalid index" ~:
-      prev 3 [1,2] ~?= Nothing
+      prev 3 [1,2] ~?= Nothing @Int
   , "prevCyc works on finite list" ~:
-      prevCyc 2 [1,2] ~?= Just 1
+      prevCyc 2 [1,2] ~?= Just @Int 1
   , "prevCyc works at end of list" ~:
-      prevCyc 1 [1,2] ~?= Just 2
+      prevCyc 1 [1,2] ~?= Just @Int 2
   , "prevCyc fails with invalid index" ~:
-      prevCyc 3 [1,2] ~?= Nothing
+      prevCyc 3 [1,2] ~?= Nothing @Int
   , "prevComponentIndex behaves well at beginning of Strand" ~:
-      prevComponentIndex 1 (Strand [1,2]) ~?= Nothing
+      prevComponentIndex 1 (Strand [1,2]) ~?= Nothing @Int
   , "prevComponentIndex behaves well at 'beginning' of Loop" ~:
-      prevComponentIndex 1 (Loop [1,2]) ~?= Just 2
+      prevComponentIndex 1 (Loop [1,2]) ~?= Just @Int 2
   , "prevSkeletonIndex works on strand" ~:
-      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 2 ~?= Just 1
+      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 2 ~?= Just @Int 1
   , "prevSkeletonIndex fails on beginning of strand" ~:
-      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 1 ~?= Nothing
+      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 1 ~?= Nothing @Int
   , "prevSkeletonIndex passes on end of loop after first strand" ~:
-      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 3 ~?= Just 4
+      prevSkeletonIndex (skeleton $ SX [Strand [1,2], Loop [3,4]] []) 3 ~?= Just @Int 4
   , "isHeadOf passes for head" ~:
-      isHeadOf 1 [1,2] ~?= True
+      isHeadOf @Int 1 [1,2] ~?= True
   , "isHeadOf fails for nonhead" ~:
-      isHeadOf 2 [1,2] ~?= False
+      isHeadOf @Int 2 [1,2] ~?= False
   , "isHeadOf fails for nonelement" ~:
-      isHeadOf 3 [1,2] ~?= False
+      isHeadOf @Int 3 [1,2] ~?= False
   , "isLastOf passes for last" ~:
-      isLastOf 2 [1,2] ~?= True
+      isLastOf @Int 2 [1,2] ~?= True
   , "isLastOf fails for nonlast" ~:
-      isLastOf 1 [1,2] ~?= False
+      isLastOf @Int 1 [1,2] ~?= False
   , "isLastOf fails for nonelement" ~:
-      isLastOf 3 [1,2] ~?= False
+      isLastOf @Int 3 [1,2] ~?= False
   , "isHeadOfComponent passes for head" ~:
-      isHeadOfComponent 1 (Strand [1,2]) ~?= True
+      isHeadOfComponent 1 (Strand @Int [1,2]) ~?= True
   , "isHeadOfComponent fails for nonhead" ~:
-      isHeadOfComponent 2 (Strand [1,2]) ~?= False
+      isHeadOfComponent 2 (Strand @Int [1,2]) ~?= False
   , "isHeadOfComponent fails for nonelement" ~:
-      isHeadOfComponent 3 (Strand [1,2]) ~?= False
+      isHeadOfComponent 3 (Strand @Int [1,2]) ~?= False
   , "isHeadOfComponent passes for head" ~:
-      isHeadOfComponent 1 (Loop [1,2]) ~?= False
+      isHeadOfComponent 1 (Loop @Int [1,2]) ~?= False
   , "isHeadOfComponent fails for nonhead" ~:
-      isHeadOfComponent 2 (Loop [1,2]) ~?= False
+      isHeadOfComponent 2 (Loop @Int [1,2]) ~?= False
   , "isHeadOfComponent fails for nonelement" ~:
-      isHeadOfComponent 3 (Loop [1,2]) ~?= False
+      isHeadOfComponent 3 (Loop @Int [1,2]) ~?= False
   , "isLastOfComponent passes for last" ~:
-      isLastOfComponent 2 (Strand [1,2]) ~?= True
+      isLastOfComponent 2 (Strand @Int [1,2]) ~?= True
   , "isLastOfComponent fails for nonlast" ~:
-      isLastOfComponent 1 (Strand [1,2]) ~?= False
+      isLastOfComponent 1 (Strand @Int [1,2]) ~?= False
   , "isLastOfComponent fails for nonelement" ~:
-      isLastOfComponent 3 (Strand [1,2]) ~?= False
+      isLastOfComponent 3 (Strand @Int [1,2]) ~?= False
   , "isLastOfComponent passes for last" ~:
-      isLastOfComponent 2 (Loop [1,2]) ~?= False
+      isLastOfComponent 2 (Loop @Int [1,2]) ~?= False
   , "isLastOfComponent fails for nonlast" ~:
-      isLastOfComponent 1 (Loop [1,2]) ~?= False
+      isLastOfComponent 1 (Loop @Int [1,2]) ~?= False
   , "isLastOfComponent fails for nonelement" ~:
-      isLastOfComponent 3 (Loop [1,2]) ~?= False
+      isLastOfComponent 3 (Loop @Int [1,2]) ~?= False
   , "findNextXing finds next Xing" ~: TestList $
       zipWith
         (\d x -> findNextXing
-          (SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]) d
+          (SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]) d
           ~?= Just x
         )
         [(1,Out), (2,Out), (3,In), (6,Out), (1,In)]
         [Xp 1 4 , Xp 5 2 , Xp 5 2, Xp 3 6 , Xp 3 6]
   , "findNextXing fails to find next Xing" ~: TestList $
     map
-      (let k = SX [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+      (let k = SX @Int [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
         in \d -> findNextXing k d ~?= Nothing
       )
     [(1,In), (7,In), (7,Out)]
@@ -186,6 +192,7 @@ testRVTs = [ RVT
                [(1,0),(2,-1),(3,0),(4,0)]
            ]
 
+testSXs :: [SX Int]
 testSXs = [ SX
                [Strand [1]]
                []
@@ -197,11 +204,11 @@ testSXs = [ SX
                [Xp 1 2, Xp 4 3]
            ]
 
-
+knotObjectConversionHelperTests :: Test
 knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: TestList
   [ "absorbXing absorbs xing attached to first element of front" ~: TestList $
     [ TestList $ zipWith3
-        (let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+        (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
           in \f x rf -> absorbXing k x f ~?= rf
         )
         (map return [(1,Out), (1,In), (2,Out),(2, In)])
@@ -236,7 +243,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
   , "(>>= advanceFront) chains properly" ~: TestList $
       [ "(>>= advanceFront)" ~: TestList $ zipWith
           ( \f rf ->
-            let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+            let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
              in (f >>= advanceFront k) ~?= rf
           )
           [ ([(1,1)],[(1,Out)])
@@ -247,7 +254,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           ]
       , "(>>= advanceFront)^○2" ~: TestList $ zipWith
           ( \f rf ->
-            let k = SX [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+            let k = SX @Int [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
              in (f >>= advanceFront k >>= advanceFront k) ~?= rf
           )
           [ ([(1,1)],[(1,In),(1,Out)])
@@ -259,7 +266,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           ]
       , "(>>= advanceFront) Hopf link" ~: TestList $ zipWith
           ( \f rf ->
-            let k = SX [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
+            let k = SX @Int [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
              in (f >>= advanceFront k) ~?= rf
           )
           [ ([(1,1)],[(1,Out)])
@@ -271,7 +278,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
       , "(>>= advanceFront)^n (Hopf link)" ~: TestList $
           zipWith (~?=)
             ( take 6 $ iterate
-                ( let k = SX [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
+                ( let k = SX @Int [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
                    in (>>= advanceFront k)
                 )
                 ([(1,1)],[(1,Out)])
@@ -286,7 +293,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
     ]
   , "advanceFront works when arc connects back to front" ~: TestList $
       [ TestList $ zipWith
-          (let k = SX [Loop [1]] []
+          (let k = SX @Int [Loop [1]] []
             in \f rf -> advanceFront k f ~?= rf
           )
           [ [(1,Out), (1,In )]
@@ -300,7 +307,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           , ([]       ,[(1,In), (3, Out)])
           ]
       , TestList $ zipWith
-          (let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+          (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
             in \f rf -> advanceFront k f ~?= rf
           )
           [ [(1,Out), (1,In )]
@@ -313,13 +320,14 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           ]
       ]
   , "getRotNums tests" ~: TestList
-      [ getRotNums (SX [Loop [1]] []) [(1,In ),(1,Out)] ~?= []
-      , getRotNums (SX [Loop [1]] []) [(1,Out),(1,In )] ~?= [(1,-1)]
+      [ getRotNums (SX @Int [Loop [1]] []) [(1,In ),(1,Out)] ~?= []
+      , getRotNums (SX @Int [Loop [1]] []) [(1,Out),(1,In )] ~?= [(1,-1)]
       ]
   ]
 
 -- NB: Conversion program cycles are expected to produce an equivalent knot
 -- diagram, not and identical knot program. Keep this in mind if a test fails.
+knotObjectConversionTests :: Test
 knotObjectConversionTests = "KnotObject conversions" ~: TestList
   [ "toSX . toRVT == id" ~: TestList
     [ TestList $ map (\s -> (toSX . toRVT) s ~?= s) testSXs
@@ -381,6 +389,7 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
           -- ) testSXs
   ]
 
+namedKnotsTests :: Test
 namedKnotsTests = "Named knots/ links tests" ~: TestList
   [ "Named knot lookup makes sense" ~:
       knot 3 True 1 ~?= SX [Strand[1, 2, 3, 4, 5, 6]] [Xm 4 1, Xm 6 3, Xm 2 5]
@@ -392,6 +401,7 @@ namedKnotsTests = "Named knots/ links tests" ~: TestList
       link 2 True (-1) ~?= SX [] [] -- this should fail
   ]
 
+metaHopfTests :: Test
 metaHopfTests = "Meta-Hopf algebra tests" ~: TestList
   [ toMetaHopfExpression (RVT [Loop[1 :: Int]] [] [(1,0)]) ~?= [Unit 1]
   ]

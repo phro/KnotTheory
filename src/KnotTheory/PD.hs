@@ -238,9 +238,6 @@ advanceFront k f@((i,d):fs) =
   where fs' = deleteBy ((==) `on` fst) (i,d) fs
   -- where fs' = delete id' fs
 
-f =  let k = SX [Loop [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
-      in (>>= advanceFront k)
-
 absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
 absorbXing k x ((i,d):fs) =
   case d of
