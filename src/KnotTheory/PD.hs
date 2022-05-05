@@ -6,14 +6,8 @@ import Data.Tuple (swap)
 import Data.Function (on)
 
 type Index = Int
-data Xing i = Xp i i | Xm i i-- | Xv i i
+data Xing i = Xp i i | Xm i i -- | Xv i i
   deriving (Eq, Show, Functor)
-
--- instance Functor Xing where
-  -- fmap f x =
-    -- case x of
-      -- Xp i j -> Xp (f i) (f j)
-      -- Xm i j -> Xm (f i) (f j)
 
 sign :: (Integral b) => Xing Index -> b
 sign (Xp _ _) = 1
@@ -65,9 +59,6 @@ reindex k = fmap (fromJust . flip lookup table) k
     table = zip (strandIndices s) [1..]
     s = skeleton k
 
--- data SX  = SX (Skeleton Index) [Xing Index] deriving (Show, Eq)
--- data RVT = RVT (Skeleton Index) [Xing Index] [(Index,Int)] deriving (Show, Eq)
-
 instance KnotObject SX where
   toSX = id
   toRVT k@(SX cs xs) = RVT cs xs rs where
@@ -117,10 +108,7 @@ strandIndices = concatMap toList
     -- where o = overStrand x
           -- u = underStrand x
 involves :: (Eq i) => Xing i -> i -> Bool
-Xp i j `involves` k = i == k || j == k
-Xm i j `involves` k = i == k || j == k
--- Xv i j `involves` k = i == k || j == k
--- Can the duplication be avoided here?
+x `involves` k = k `elem` [underStrand x, overStrand x]
 
 -- safeOtherArc :: Xing i -> i -> Maybe i
 -- safeOtherArc (Xm i j) k
@@ -141,19 +129,17 @@ otherArc x i
         u = underStrand x
 
 next :: (Eq i) => i -> Strand i -> Maybe i
-next _ []  = Nothing
-next _ [_] = Nothing
 next i (x:y:ys)
   | i == x = Just y
   | otherwise = next i (y:ys)
+next _ _ = Nothing
+-- next e = listToMaybe . drop 1 . dropWhile (/= e)
 
 prev :: (Eq i) => i -> Strand i -> Maybe i
-prev _ []  = Nothing
-prev _ [_] = Nothing
 prev i (x:y:ys)
   | i == y = Just x
   | otherwise = prev i (y:ys)
--- next e = listToMaybe . drop 1 . dropWhile (/= e)
+prev _ _ = Nothing
 
 nextCyc :: (Eq i) => i -> Loop i -> Maybe i
 nextCyc e xs = next e . take (length xs + 1). cycle $ xs
@@ -236,7 +222,6 @@ advanceFront k f@((i,d):fs) =
         Just x  -> absorbXing k x f
         Nothing -> return fs
   where fs' = deleteBy ((==) `on` fst) (i,d) fs
-  -- where fs' = delete id' fs
 
 absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
 absorbXing k x ((i,d):fs) =

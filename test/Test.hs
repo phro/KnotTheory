@@ -2,7 +2,6 @@
 {-# LANGUAGE TypeApplications #-}
 module Main where
 import Control.Exception
--- import Control.Monad
 import Test.HUnit
 
 import KnotTheory.PD
@@ -219,7 +218,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
         , ([(4,1)],[(4,In ),(1,In ),(5,Out)])
         ]
     , TestList $ zipWith3
-        (let k = SX [Loop [1,2,3,4,5,6]] [Xm 4 1, Xm 2 5, Xm 6 3]
+        (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xm 4 1, Xm 2 5, Xm 6 3]
           in \f x rf -> absorbXing k x f ~?= rf
         )
         (map return [(1,Out), (1,In), (2,Out),(2, In)])
@@ -232,7 +231,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
     ]
   , "advanceFront works when xing present" ~: TestList $
     zipWith
-      (let k = SX [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+      (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
         in \f rf -> advanceFront k f ~?= rf
       )
       (map return [(1,Out), (1,In), (2,Out)])

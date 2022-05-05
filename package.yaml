@@ -60,6 +60,8 @@ tests:
       - -Wincomplete-record-updates
       - -Wincomplete-uni-patterns
       - -Wredundant-constraints
+      - -j +RTS -A128m -n2m -RTS
+      - -O0
     dependencies:
       - knotTheory
       - HUnit
