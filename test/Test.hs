@@ -413,3 +413,11 @@ metaHopfTests :: Test
 metaHopfTests = "Meta-Hopf algebra tests" ~: TestList
   [ toMetaHopfExpression (RVT [Loop[1 :: Int]] [] [(1,0)]) ~?= [Unit 1]
   ]
+
+thinPositionTests :: Test
+thinPositionTests = "Thin position tests" ~: TestList
+        [ "width of a knot returns a correct value." ~:
+                width (knot 3 True 1) ~?= 4
+        , "thinPosition of a knot becomes shorter" ~:
+                (width . thinPosition) (knot 8 True 1) ~?= 4
+        ]
