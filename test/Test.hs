@@ -400,7 +400,7 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
 namedKnotsTests :: Test
 namedKnotsTests = "Named knots/ links tests" ~: TestList
   [ "Named knot lookup makes sense" ~:
-      knot 3 True 1 ~?= SX [Strand[1, 2, 3, 4, 5, 6]] [Xm 4 1, Xm 6 3, Xm 2 5]
+      knot 3 True 1 ~?= SX [Loop[1, 2, 3, 4, 5, 6]] [Xm 4 1, Xm 6 3, Xm 2 5]
   , "Named knot fails appropriately" ~:
       knot 3 True (-1) ~?= SX [] [] -- this should fail
   , "Named link lookup makes sense" ~:
