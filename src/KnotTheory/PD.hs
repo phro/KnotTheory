@@ -184,6 +184,16 @@ nextSkeletonIndex s i = listToMaybe . mapMaybe (nextComponentIndex i) $ s
 prevSkeletonIndex :: (Eq i) => Skeleton i -> i -> Maybe i
 prevSkeletonIndex s i = listToMaybe . mapMaybe (prevComponentIndex i) $ s
 
+getXingIndices :: (Eq i) => Skeleton i -> Xing i -> [i]
+getXingIndices s x = catMaybes [ Just o
+                               , Just u
+                               , nextSkeletonIndex s o
+                               , nextSkeletonIndex s u
+                               ]
+                       where
+                               o = overStrand x
+                               u = underStrand x
+
 {-
  - Assumptions:
  -   1. k is a (1,n)-tangle (a tangle with only one open component)

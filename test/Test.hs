@@ -83,7 +83,7 @@ xingTests = "Xing properties" ~: TestList
          [ getXingIndices s (Xp 1 3 :: Xing Int) ~?= [1,3,2,4]
          , getXingIndices s (Xp 2 3) ~?= [2,3,4]
          , getXingIndices s (Xp 2 4) ~?= [2,4,3]
-         , getXingIndices s (Xp 1 4) ~?= [2,4,3]
+         , getXingIndices s (Xp 1 4) ~?= [1,4,2,3]
          ]
   ]
 
