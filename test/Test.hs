@@ -76,6 +76,15 @@ xingTests = "Xing properties" ~: TestList
       , otherArc (Xm 1 2) 2 ~?= Just @Int 1
       , otherArc (Xm 1 2) 3 ~?= Nothing @Int
       ]
+  , "getXingIndices returns list of indices connected to the xing" ~: TestList $
+      let
+        s = [Strand[1,2],Loop[3,4]]
+      in 
+         [ getXingIndices s (Xp 1 3 :: Xing Int) ~?= [1,3,2,4]
+         , getXingIndices s (Xp 2 3) ~?= [2,3,4]
+         , getXingIndices s (Xp 2 4) ~?= [2,4,3]
+         , getXingIndices s (Xp 1 4) ~?= [2,4,3]
+         ]
   ]
 
 knotObjectTests :: Test
