@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 module KnotTheory.PD where
 import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
-import Data.List (find, groupBy, sortOn, delete, deleteBy)
+import Data.List (find, groupBy, sortOn, delete, deleteBy, intersect, union, (\\))
 import Data.Tuple (swap)
 import Data.Function (on)
 
@@ -269,3 +269,8 @@ findNextXing k (i,In ) = do
   i' <- prevSkeletonIndex (skeleton k) i
   find (`involves` i') $ xings k
   -- (prevSkeletonIndex i $ skeleton k) >>= (\i' -> find (`involves` i') $ xings k)
+
+width :: (PD a, Eq i) => a i -> Int
+width k = maximum . map length . scanl1
+        (\is js -> (is `union` js) \\ (is `intersect` js)) .
+                map (getXingIndices (skeleton k)) $ xings k
