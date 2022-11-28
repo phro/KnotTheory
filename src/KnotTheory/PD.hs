@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 module KnotTheory.PD where
 import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
-import Data.List (find, groupBy, sortOn, delete, deleteBy, intersect, union, (\\))
+import Data.List (find, groupBy, sortOn, intersect, union, (\\))
 import Data.Tuple (swap)
 import Data.Function (on)
 
@@ -223,15 +223,15 @@ getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return
 
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront _ []           = return []
-advanceFront k f@((i,d):fs) =
+advanceFront k f@(f1@(i,_):fs) =
   case find ((== i) . fst) fs of
     Just (i,In ) -> (return (i,-1), fs')
     Just (i,Out) -> return fs'
     Nothing      ->
-      case findNextXing k (i,d) of
+      case findNextXing k f1 of
         Just x  -> absorbXing k x f
         Nothing -> return fs
-  where fs' = deleteBy ((==) `on` fst) (i,d) fs
+  where fs' = filter ((/=i).fst) fs
 
 absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
 absorbXing k x ((i,d):fs) =
