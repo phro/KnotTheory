@@ -33,6 +33,7 @@ tests = TestList [ helperFunctionTests
                  , knotObjectConversionHelperTests
                  , knotObjectConversionTests
                  , namedKnotsTests
+                 , thinPositionTests
                  ]
 
 helperFunctionTests :: Test
@@ -193,11 +194,11 @@ testRVTs = [ RVT
            , RVT --  trefoil
                [Strand [1,2,3,4,5,6]]
                [Xp 1 4, Xp 5 2, Xp 3 6]
-               [(1,0),(2,0),(3,0),(4,-1),(5,0),(6,0)]
+               [(1,1),(2,0),(3,0),(4,-1),(5,0),(6,0)]
            , RVT
                [Strand [1,3], Loop [2,4]]
                [Xp 1 2, Xp 4 3]
-               [(1,0),(2,-1),(3,0),(4,0)]
+               [(1,1),(2,-1),(3,0),(4,0)]
            ]
 
 testSXs :: [SX Int]
