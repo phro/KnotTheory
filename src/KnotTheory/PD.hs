@@ -272,3 +272,6 @@ width :: (PD a, Eq i) => a i -> Int
 width k = maximum . map length . scanl1
         (\is js -> (is `union` js) \\ (is `intersect` js)) .
                 map (getXingIndices (skeleton k)) $ xings k
+
+thinPosition :: (PD a) => a i -> a i
+thinPosition = undefined
