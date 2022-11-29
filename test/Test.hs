@@ -199,6 +199,10 @@ testRVTs = [ RVT
                [Strand [1,3], Loop [2,4]]
                [Xp 1 2, Xp 4 3]
                [(1,1),(2,-1)]
+           , RVT
+               [Strand [1,2,3,4], Loop [5,6,7,8,9,10]]
+               [Xm 1 6,Xm 7 10,Xm 5 4,Xp 9 2,Xp 3 8]
+               [(1,1),(3,1),(4,-1),(6,1),(8,1)]
            ]
 
 testSXs :: [SX Int]
@@ -211,6 +215,9 @@ testSXs = [ SX
            , SX
                [Strand [1,3], Loop [2,4]]
                [Xp 1 2, Xp 4 3]
+           , SX
+               [Strand [1,2,3,4],Loop [5,6,7,8,9,10]]
+               [Xm 1 6,Xm 7 10,Xm 5 4,Xp 9 2,Xp 3 8]
            ]
 
 knotObjectConversionHelperTests :: Test
