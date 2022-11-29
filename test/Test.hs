@@ -403,11 +403,11 @@ namedKnotsTests = "Named knots/ links tests" ~: TestList
   [ "Named knot lookup makes sense" ~:
       knot 3 True 1 ~?= SX [Loop[1, 2, 3, 4, 5, 6]] [Xm 4 1, Xm 6 3, Xm 2 5]
   , "Named knot fails appropriately" ~:
-      knot 3 True (-1) ~?= SX [] [] -- this should fail
+      assertException "invalid knot" InvalidNamedKnot (evaluate $ knot 3 True (-1))
   , "Named link lookup makes sense" ~:
       link 2 True 1 ~?= SX [Loop[1, 2], Loop[3, 4]] [Xm 1 4, Xm 3 2]
   , "Named link fails appropriately" ~:
-      link 2 True (-1) ~?= SX [] [] -- this should fail
+      assertException "invalid link" InvalidNamedLink (evaluate $ link 2 True (-1))
   ]
 
 metaHopfTests :: Test

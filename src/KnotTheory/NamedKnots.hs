@@ -7,8 +7,10 @@ module KnotTheory.NamedKnots ( knot
                              , NamedKnot
                              , namedKnots
                              , namedLinks
+                             , KnotLookupException(..)
                              ) where
 
+import Control.Exception
 import KnotTheory.PD
 -- import qualified Data.Set as S
 
@@ -29,14 +31,19 @@ import KnotTheory.PD
 
 type NamedKnot = (Int,Bool,Int)
 
+data KnotLookupException = InvalidNamedKnot | InvalidNamedLink
+        deriving (Eq,Show)
+
+instance Exception KnotLookupException
+
 knot :: Int -> Bool -> Int -> SX Int
 knot i a j = case lookup (i,a,j) namedKnots of
                Just sx -> sx
-               Nothing -> error "knot: invalid named knot"
+               Nothing -> throw InvalidNamedKnot
 link :: Int -> Bool -> Int -> SX Int
 link i a j = case lookup (i,a,j) namedLinks of
                Just sx -> sx
-               Nothing -> error "link: invalid named link"
+               Nothing -> throw InvalidNamedLink
 
 -- instance KnotObject NamedKnot where
   -- toSX k@(K _ _ _) = case lookup k namedKnots of
