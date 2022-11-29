@@ -62,9 +62,7 @@ reindex k = fmap (fromJust . flip lookup table) k
 instance KnotObject SX where
   toSX = id
   toRVT k@(SX cs xs) = RVT cs xs rs where
-    rs = mergeBy sum $ getRotNums k [(i1,Out)]
-        -- ++ [ (i, 0) | i <- strandIndices cs ]
-        ++ [ (i, δ i i1) | i <- strandIndices cs ]
+    rs = filter ((/=0) . snd) . mergeBy sum $ (i1,1) : getRotNums k [(i1,Out)]
     i1 = head . toList $ s
     Just s = find isStrand cs
 
