@@ -262,7 +262,7 @@ data Dir = In | Out
 -- There should be cleaner functions to deal with xings and their associated
 -- strands.
 
-findNextXing :: (Eq i, PD k, KnotObject k) => k i -> (i,Dir) -> Maybe (Xing i)
+findNextXing :: (Eq i, PD k) => k i -> (i,Dir) -> Maybe (Xing i)
 findNextXing k (i,Out) = find (`involves` i) $ xings k
 findNextXing k (i,In ) = do
   i' <- prevSkeletonIndex (skeleton k) i
