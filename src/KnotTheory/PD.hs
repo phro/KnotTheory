@@ -223,8 +223,9 @@ advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront _ []           = return []
 advanceFront k f@(f1@(i,_):fs) =
   case find ((== i) . fst) fs of
-    Just (i,In ) -> (return (i,-1), fs')
-    Just (i,Out) -> return fs'
+    Just (j,In ) -> (return (j,-1), fs')
+    Just (_,Out) -> return fs'
+    -- Just (i,dir) -> (return (i,-δ dir In), fs')
     Nothing      ->
       case findNextXing k f1 of
         Just x  -> absorbXing k x f
