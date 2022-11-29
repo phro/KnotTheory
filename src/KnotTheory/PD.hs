@@ -212,7 +212,7 @@ mergeBy :: (Ord i) => ([a] -> b) -> [(i,a)] -> [(i,b)]
 mergeBy f = map (wrapIndex f) . groupBy ((==) `on` fst) . sortOn fst
   where
     wrapIndex :: ([a] -> b) -> [(i,a)] -> (i,b)
-    wrapIndex f xs@(x:ys) = (fst x, f . map snd $ xs)
+    wrapIndex g xs@(x:_) = (fst x, g . map snd $ xs)
 
 type Front i = [(i,Dir)]
 
