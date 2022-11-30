@@ -43,6 +43,23 @@ openFirstStrand _              = error "knot object has no strands"
 main :: IO ()
 -- main = putStrLn $ "rvks = " ++ (toMMA . map toRVT) allKnots
 -- main = putStrLn $ "rvks = " ++ (toMMA . map toRVT) allKnots
-main = putStrLn $ "rvksLinks = " ++ toMMA (map (toRVT . openFirstStrand) allLinks)
+-- main = putStrLn $ "rvksLinks = " ++ toMMA (map (toRVT . openFirstStrand) allLinks)
 -- main = putStrLn $ "rvksLinks = " ++ toMMA (map toRVT allLinks)
 -- main = print . toRVT $ SX [Strand [1,2], Loop[3,4]] [Xp 1 3, Xm 2 4]
+
+toTangledObject :: String -> NamedKnot -> String
+toTangledObject s (n, a, xs)  = s++"["++
+        show n++", "++(if a then "" else "Non")++"Alternating, "++show xs++"]"
+
+toKnot :: NamedKnot -> String
+toKnot = toTangledObject "Knot"
+
+toLink :: NamedKnot -> String
+toLink = toTangledObject "Link"
+
+main = let eqs = ks ++ ls
+           ks  = map (\(k,sx) ->  toKnot k ++ " = " ++ rvt sx) namedKnots
+           ls  = map (\(l,sx) ->  toLink l ++ " = " ++ rvt sx) namedLinks
+           rvt = toMMA . toRVT . openFirstStrand
+        in
+           mapM_ putStrLn eqs
