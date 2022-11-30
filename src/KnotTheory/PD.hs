@@ -246,7 +246,7 @@ absorbXing k x ((i,d):fs) =
         j' = j >>= nextSkeletonIndex s
     In
       | isPositive x == (i' == Just (overStrand x)) ->
-        (f [(j,1)],f [(j ,In ),(i',In),(j',Out)] ++ fs)
+        (f [(j',1)],f [(j ,In ),(i',In),(j',Out)] ++ fs)
       | otherwise ->
         return $ f [(j',Out),(i',In),(j ,In )] ++ fs
       where
