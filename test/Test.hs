@@ -365,11 +365,13 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
           map (\s -> (toRVT . toRVT) s ~?= toRVT s) testSXs
       ]
   , "toRVT returns classical kinks" ~: TestList $
-    [ TestList $ map (\s -> let rs = map snd . rotnums . toRVT $ s
+    [ TestList $ map (\s -> let rs = map (rotnum . toRVT $ s) .
+                                    strandIndices . skeleton $ s
                                 m = minimum rs
        in -1 <= m ~? "nonusual negative kink detected:" ++ show m
                      ) testSXs
-    , TestList $ map (\s -> let rs = map snd . rotnums . toRVT $ s
+    , TestList $ map (\s -> let rs = map (rotnum . toRVT $ s) .
+                                    strandIndices . skeleton $ s
         in let m = maximum rs
             in m <= 1 ~? "nonusual positive kink detected:" ++ show m
                      ) testSXs
