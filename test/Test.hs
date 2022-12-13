@@ -232,7 +232,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
         [ ([]     ,[(5,Out),(2,Out),(4,In )])
         , ([]     ,[(4,Out),(6,In ),(3,In )])
         , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
-        , ([(4,1)],[(4,In ),(1,In ),(5,Out)])
+        , ([(5,1)],[(4,In ),(1,In ),(5,Out)])
         ]
     , TestList $ zipWith3
         (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xm 4 1, Xm 2 5, Xm 6 3]
@@ -243,7 +243,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
         [ ([]     ,[(5,Out),(2,Out),(4,In )])
         , ([]     ,[(4,Out),(6,In ),(3,In )])
         , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
-        , ([(4,1)],[(4,In ),(1,In ),(5,Out)])
+        , ([(5,1)],[(4,In ),(1,In ),(5,Out)])
         ]
     ]
   , "advanceFront works when xing present" ~: TestList $
