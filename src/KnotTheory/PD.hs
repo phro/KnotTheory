@@ -42,8 +42,8 @@ data Component i = Strand (Strand i) | Loop (Loop i)
 
 -- Q. Is it important to require these conversion programs for *any* knot object?
 class KnotObject k where
-  toSX  :: (Ord i, Enum i) => k i -> SX i
-  toRVT :: (Ord i, Enum i) => k i -> RVT i
+  toSX  :: (Ord i) => k i -> SX i
+  toRVT :: (Ord i) => k i -> RVT i
   toRVT = toRVT . toSX
 
 class PD k where
