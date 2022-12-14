@@ -431,3 +431,15 @@ thinPositionTests = "Thin position tests" ~: TestList
         , "thinPosition of a knot becomes shorter" ~:
                 (width . thinPosition) (knot 8 True 1) ~?= 4
         ]
+
+tangleTests :: Test
+tangleTests = "Tangle-manipulation tests" ~: TestList
+        [ "applyAt applies a function at the appropriate place on a list" ~:
+                applyAt negate 3 [0,1,2,-3] ~?= [0..3]
+        , "diag generates a diagonal matrix" ~:
+                diag (const 1) (replicate 3 0) ~?= [[1,0,0],[0,1,0],[0,0,1]]
+        , "cycles produces all cycles of a finite list" ~:
+                cycles [1,2,3] ~?= [[1,2,3],[2,3,1],[3,1,2]]
+        , "cycles behaves appropriately on an empty list" ~:
+                cycles [] ~?= [[]]
+        ]
