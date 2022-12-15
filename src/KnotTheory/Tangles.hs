@@ -16,8 +16,8 @@ cycles x = x:map (\n -> take l . drop n $ xs) [1.. l-1]
         where xs = cycle x
               l  = length x
 
-compCuts :: (Eq i) => Component i -> Skeleton i -> [Skeleton i]
-compCuts c s = map ((: delete c s). Strand) . cycles . toList $ c
+compCuts :: (Eq i) => Skeleton i -> Component i -> [Skeleton i]
+compCuts s c = map ((: delete c s). Strand) . cycles . toList $ c
 
 allCuts :: (Eq i) => Skeleton i -> [[Skeleton i]]
 allCuts = undefined
