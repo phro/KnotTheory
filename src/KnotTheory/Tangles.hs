@@ -19,6 +19,6 @@ cycles x = x:map (\n -> take l . drop n $ xs) [1.. l-1]
 compCuts :: (Eq i) => Component i -> Skeleton i -> [Skeleton i]
 compCuts c s = map ((: delete c s). Strand) . cycles . toList $ c
 
-toRVTSplits :: SX Int -> [RVT Int]
-toRVTSplits = map (reindex . toRVT) . getSplits 
+allCuts :: (Eq i) => Skeleton i -> [[Skeleton i]]
+allCuts = undefined
 

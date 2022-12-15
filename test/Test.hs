@@ -447,4 +447,13 @@ tangleTests = "Tangle-manipulation tests" ~: TestList
                         [ [Strand[1,2],Loop[3,4]]
                         , [Strand[2,1],Loop[3,4]]
                         ]
+        , "allCuts returns all possible cuts for a skeleton." ~:
+                allCuts [Loop[3 :: Int,4],Loop[1,2]] ~?=
+                        [ [ [Strand[3,4],Loop[1,2]]
+                          , [Strand[4,3],Loop[1,2]]
+                          ]
+                        , [ [Strand[1,2],Loop[3,4]]
+                          , [Strand[2,1],Loop[3,4]]
+                          ]
+                        ]
         ]
