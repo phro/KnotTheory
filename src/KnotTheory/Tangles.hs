@@ -12,7 +12,7 @@ diag f xs = map (\i -> applyAt f i xs) [0..n-1]
         where n = length xs
 
 cycles :: [a] -> [[a]]
-cycles x = map (\n -> take l . drop n $ xs) [0.. l-1]
+cycles x = x:map (\n -> take l . drop n $ xs) [1.. l-1]
         where xs = cycle x
               l  = length x
 
