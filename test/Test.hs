@@ -456,4 +456,14 @@ tangleTests = "Tangle-manipulation tests" ~: TestList
                           , [Strand[2,1],Loop[3,4]]
                           ]
                         ]
+        , "getSplits returns all possible SX forms with one component open." ~:
+                getSplits (SX [Loop[3::Int,4],Loop[1,2]] [Xp 1 3,Xm 2 4]) ~?=
+                        [ [ SX [Strand[3,4],Loop[1,2]] [Xp 1 3, Xm 2 4]
+                          , SX [Strand[4,3],Loop[1,2]] [Xp 1 3, Xm 2 4]
+                          ]                                     
+                        , [ SX [Strand[1,2],Loop[3,4]] [Xp 1 3, Xm 2 4]
+                          , SX [Strand[2,1],Loop[3,4]] [Xp 1 3, Xm 2 4]
+                          ]
+                        ]
+
         ]
