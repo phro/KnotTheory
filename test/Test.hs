@@ -445,6 +445,6 @@ tangleTests = "Tangle-manipulation tests" ~: TestList
         , "compCuts returns all possible strands from a component" ~:
                 compCuts (Loop @Int [1,2]) [Loop[3,4],Loop[1,2]] ~?=
                         [ [Strand[1,2],Loop[3,4]]
-                        , [Strand[1,2],Loop[3,4]]
+                        , [Strand[2,1],Loop[3,4]]
                         ]
         ]
