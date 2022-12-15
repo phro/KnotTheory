@@ -442,4 +442,9 @@ tangleTests = "Tangle-manipulation tests" ~: TestList
                 cycles @Int [1,2,3] ~?= [[1,2,3],[2,3,1],[3,1,2]]
         , "cycles behaves appropriately on an empty list" ~:
                 cycles @[Int] [] ~?= [[]]
+        , "compCuts returns all possible strands from a component" ~:
+                compCuts (Loop @Int [1,2]) [Loop[3,4],Loop[1,2]] ~?=
+                        [ [Strand[1,2],Loop[3,4]]
+                        , [Strand[1,2],Loop[3,4]]
+                        ]
         ]
