@@ -20,5 +20,5 @@ compCuts :: (Eq i) => Skeleton i -> Component i -> [Skeleton i]
 compCuts s c = map ((: delete c s). Strand) . cycles . toList $ c
 
 allCuts :: (Eq i) => Skeleton i -> [[Skeleton i]]
-allCuts = undefined
+allCuts s = map (compCuts s) s
 
