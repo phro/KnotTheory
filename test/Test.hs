@@ -435,11 +435,11 @@ thinPositionTests = "Thin position tests" ~: TestList
 tangleTests :: Test
 tangleTests = "Tangle-manipulation tests" ~: TestList
         [ "applyAt applies a function at the appropriate place on a list" ~:
-                applyAt negate 3 [0,1,2,-3] ~?= [0..3]
+                applyAt negate 3 [0,1,2,-3] ~?= [0..3::Int] 
         , "diag generates a diagonal matrix" ~:
-                diag (const 1) (replicate 3 0) ~?= [[1,0,0],[0,1,0],[0,0,1]]
+                diag (const @Int 1) (replicate 3 0) ~?= [[1,0,0],[0,1,0],[0,0,1]]
         , "cycles produces all cycles of a finite list" ~:
-                cycles [1,2,3] ~?= [[1,2,3],[2,3,1],[3,1,2]]
+                cycles @Int [1,2,3] ~?= [[1,2,3],[2,3,1],[3,1,2]]
         , "cycles behaves appropriately on an empty list" ~:
-                cycles [] ~?= [[]]
+                cycles @[Int] [] ~?= [[]]
         ]
