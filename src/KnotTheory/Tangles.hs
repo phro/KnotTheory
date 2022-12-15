@@ -1,5 +1,6 @@
 module KnotTheory.Tangles where
 import KnotTheory.PD
+import Data.List
 
 applyAt :: (a -> a) -> Int  -> [a] -> [a]
 applyAt _ _ [] = []
