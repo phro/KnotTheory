@@ -23,4 +23,4 @@ allCuts :: (Eq i) => Skeleton i -> [[Skeleton i]]
 allCuts s = map (compCuts s) s
 
 getSplits :: (Eq i) => SX i -> [[SX i]]
-getSplits = undefined
+getSplits (SX s xs) = map (map (\s -> SX s xs)) $ allCuts s
