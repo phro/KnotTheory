@@ -234,6 +234,7 @@ advanceFront k f@(f1@(i,_):fs) =
   where fs' = filter ((/=i).fst) fs
 
 absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
+absorbXing _ _ [] = error "Front is empty."
 absorbXing k x ((i,d):fs) =
   case d of
     Out
