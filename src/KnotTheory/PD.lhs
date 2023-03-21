@@ -1,3 +1,4 @@
+\begin{code}
 {-# LANGUAGE DeriveFunctor #-}
 module KnotTheory.PD where
 import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
@@ -276,3 +277,4 @@ width k = maximum . map length . scanl1
 
 thinPosition :: (PD a) => a i -> a i
 thinPosition = undefined
+\end{code}
