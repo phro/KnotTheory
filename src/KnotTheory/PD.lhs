@@ -1,3 +1,4 @@
+Imports
 \begin{code}
 {-# LANGUAGE DeriveFunctor #-}
 module KnotTheory.PD where
@@ -5,7 +6,10 @@ import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
 import Data.List (find, groupBy, sortOn, intersect, union, (\\))
 import Data.Tuple (swap)
 import Data.Function (on)
+\end{code}
 
+Crossings
+\begin{code}
 type Index = Int
 data Xing i = Xp i i | Xm i i -- | Xv i i
   deriving (Eq, Show, Functor)
@@ -33,7 +37,10 @@ overStrand (Xm i _) = i
 underStrand :: Xing i -> i
 underStrand (Xp _ i) = i
 underStrand (Xm _ i) = i
+\end{code}
 
+Encodings for planar diagrams.
+\begin{code}
 type Strand i = [i]
 type Loop i = [i]
 type Skeleton i = [Component i]
@@ -78,7 +85,10 @@ instance PD SX where
 instance PD RVT where
   skeleton (RVT s _ _) = s
   xings (RVT _ xs _)   = xs
+\end{code}
 
+Functions that manipulate planar diagrams.
+\begin{code}
 rotnums :: RVT i -> [(i,Int)]
 rotnums (RVT _ _ rs) = rs
 
@@ -208,7 +218,10 @@ getXingIndices s x = catMaybes [ Just o
   | otherwise = 0
 
 -- toRVT k = toRVT . toSX $ k
+\end{code}
 
+PD to RVT conversion code
+\begin{code}
 mergeBy :: (Ord i) => ([a] -> b) -> [(i,a)] -> [(i,b)]
 mergeBy f = map (wrapIndex f) . groupBy ((==) `on` fst) . sortOn fst
   where
@@ -275,7 +288,10 @@ width :: (PD a, Eq i) => a i -> Int
 width k = maximum . map length . scanl1
         (\is js -> (is `union` js) \\ (is `intersect` js)) .
                 map (getXingIndices (skeleton k)) $ xings k
+\end{code}
 
+Unused code
+\begin{code}
 thinPosition :: (PD a) => a i -> a i
 thinPosition = undefined
 \end{code}
