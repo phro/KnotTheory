@@ -28,6 +28,7 @@ library:
     - KnotTheory.PD
     - KnotTheory.NamedKnots
     - KnotTheory.MetaHopf
+    - KnotTheory.Tangles
 
 executables:
   knotTheory-exe:

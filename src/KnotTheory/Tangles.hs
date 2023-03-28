@@ -24,3 +24,9 @@ allCuts s = map (compCuts s) s
 
 getSplits :: (Eq i) => SX i -> [[SX i]]
 getSplits (SX s xs) = map (map (\s -> SX s xs)) $ allCuts s
+
+toRVTSplits :: SX Int -> [[RVT Int]]
+toRVTSplits = map (map (reindex . toRVT)) . getSplits
+
+toRVTs :: SX Int -> [RVT Int]
+toRVTs = map (toRVT . head) . getSplits
