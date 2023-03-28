@@ -20,22 +20,18 @@ We define several functions which extract basic data from a crossing.
 sign :: (Integral b) => Xing Index -> b
 sign (Xp _ _) = 1
 sign (Xm _ _) = -1
--- sign (Xv _ _) = 0
 
 isPositive :: Xing i -> Bool
 isPositive (Xp _ _) = True
 isPositive (Xm _ _) = False
--- isPositive (Xv _ _) = False
 
 isNegative :: Xing i -> Bool
 isNegative (Xp _ _) = False
 isNegative (Xm _ _) = True
--- isNegative (Xv _ _) = False
 
 overStrand :: Xing i -> i
 overStrand (Xp i _) = i
 overStrand (Xm i _) = i
--- overStrand (Xv _ _) =
 
 underStrand :: Xing i -> i
 underStrand (Xp _ i) = i
