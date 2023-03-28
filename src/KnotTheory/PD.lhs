@@ -49,8 +49,13 @@ data Component i = Strand (Strand i) | Loop (Loop i)
   deriving (Eq, Show, Functor)
 
 type Skeleton i = [Component i]
-
--- Q. Is it important to require these conversion programs for *any* knot object?
+\end{code}
+Next, we introduce the notion of a \hs{KnotObject}, which has its components
+labelled by the same type \hs{i}. We further define a function \hs{toRVT} which
+converts a generic \hs{KnotObject} into an \ac{RVT}. We call an object a
+\defi{planar diagram} or \hs{PD} if it has a notion of \hs{Skeleton} and a
+collection of crossings.
+\begin{code}
 class KnotObject k where
   toSX  :: (Ord i) => k i -> SX i
   toRVT :: (Ord i) => k i -> RVT i
