@@ -2,6 +2,7 @@
 module Main where
 import KnotTheory.PD
 import KnotTheory.NamedKnots
+import KnotTheory.Tangles
 
 class MMA a where
   toMMA :: a -> String
@@ -33,7 +34,19 @@ instance (Show i) => MMA (SX i) where
   toMMA (SX  cs xs) = "SXForm["++ toMMA cs ++", "++ toMMA xs ++"]"
 
 instance (Show i) => MMA (RVT i) where
-  toMMA (RVT cs xs rs) = "RVT["++ toMMA cs ++", "++ toMMA xs ++", "++ toMMA rs++"]"
+  toMMA (RVT cs xs rs) = "RVT["++ toMMA cs ++", "++ toMMA xs ++", "++ toAssoc rs++"]"
+
+showMMAAssoc :: (Show i, Show a) => [(i,a)] -> ShowS
+showMMAAssoc = showMMAAssoc__ (\(i,a) y -> show i ++ " -> " ++ show a ++ y)
+showMMAAssoc__ :: (a -> ShowS) ->  [a] -> ShowS
+showMMAAssoc__ _     []     s = "<||>" ++ s
+showMMAAssoc__ showx (x:xs) s = "<|" ++ showx x (showl xs)
+  where
+    showl []     = "|>" ++ s
+    showl (y:ys) = ", " ++ showx y (showl ys)
+
+toAssoc :: (Show i, Show a) => [(i,a)] -> String
+toAssoc x = showMMAAssoc x ""
 
 openFirstStrand :: SX i -> SX i
 openFirstStrand (SX (c:cs) xs) = SX cs' xs
@@ -58,8 +71,8 @@ toLink :: NamedKnot -> String
 toLink = toTangledObject "Link"
 
 main = let eqs = ks ++ ls
-           ks  = map (\(k,sx) ->  toKnot k ++ " = " ++ rvt sx) namedKnots
-           ls  = map (\(l,sx) ->  toLink l ++ " = " ++ rvt sx) namedLinks
-           rvt = toMMA . toRVT . openFirstStrand
+           ks  = map (\(k,sx) ->  "toRVTs["++toKnot k++"] = "++rvts sx) namedKnots
+           ls  = map (\(l,sx) ->  "toRVTs["++toLink l++"] = "++rvts sx) namedLinks
+           rvts = toMMA . toRVTs
         in
            mapM_ putStrLn eqs
