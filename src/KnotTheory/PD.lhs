@@ -37,15 +37,18 @@ underStrand :: Xing i -> i
 underStrand (Xp _ i) = i
 underStrand (Xm _ i) = i
 \end{code}
-
-Encodings for planar diagrams.
+Next, we introduce the notion of a planar diagram, whose data is comprised of a
+collection of \hs{Strand}s and \hs{Loop}s (indexed by some type \hs{i}, typically an
+integer). The \hs{Skeleton} of a planar diagram is defined to be the
+collection of \hs{Component}s, each of which is either an open \hs{Strand} or a closed
+\hs{Loop}.
 \begin{code}
 type Strand i = [i]
 type Loop i = [i]
-type Skeleton i = [Component i]
-
 data Component i = Strand (Strand i) | Loop (Loop i)
   deriving (Eq, Show, Functor)
+
+type Skeleton i = [Component i]
 
 -- Q. Is it important to require these conversion programs for *any* knot object?
 class KnotObject k where
