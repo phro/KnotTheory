@@ -1,4 +1,5 @@
-Imports
+We begin with a series of imports of common functions, relating to list
+manipulations and type-wrangling. The exact details are not too important.
 \begin{code}
 {-# LANGUAGE DeriveFunctor #-}
 module KnotTheory.PD where
@@ -7,13 +8,15 @@ import Data.List (find, groupBy, sortOn, intersect, union, (\\))
 import Data.Tuple (swap)
 import Data.Function (on)
 \end{code}
-
-Crossings
+Next, we introduce the crossing type, which can be either positive \hs{Xp} or
+negative \hs{Xm} (using the mnemonic "plus" and "minus"):
 \begin{code}
 type Index = Int
 data Xing i = Xp i i | Xm i i -- | Xv i i
   deriving (Eq, Show, Functor)
-
+\end{code}
+We define several functions which extract basic data from a crossing.
+\begin{code}
 sign :: (Integral b) => Xing Index -> b
 sign (Xp _ _) = 1
 sign (Xm _ _) = -1
