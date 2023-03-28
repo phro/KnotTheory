@@ -1,0 +1,13 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "knotTheory:lib"
+
+    - path: "./app/Main.hs"
+      component: "knotTheory:exe:knotTheory-exe"
+
+    - path: "./app/Paths_knotTheory.hs"
+      component: "knotTheory:exe:knotTheory-exe"
+
+    - path: "./test"
+      component: "knotTheory:test:knotTheory-test"
