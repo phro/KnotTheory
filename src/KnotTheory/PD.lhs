@@ -9,7 +9,7 @@ import Data.Tuple (swap)
 import Data.Function (on)
 \end{code}
 Next, we introduce the crossing type, which can be either positive \hs{Xp} or
-negative \hs{Xm} (using the mnemonic "plus" and "minus"):
+negative \hs{Xm} (using the mnemonic \enquote{plus} and \enquote{minus}):
 \begin{code}
 type Index = Int
 data Xing i = Xp i i | Xm i i -- | Xv i i
@@ -53,7 +53,7 @@ type Skeleton i = [Component i]
 Next, we introduce the notion of a \hs{KnotObject}, which has its components
 labelled by the same type \hs{i}. We further define a function \hs{toRVT} which
 converts a generic \hs{KnotObject} into an \ac{RVT}. We call an object a
-\defi{planar diagram} or \hs{PD} if it has a notion of \hs{Skeleton} and a
+\defi{planar diagram} (or \hs{PD}) if it has a notion of \hs{Skeleton} and a
 collection of crossings.
 \begin{code}
 class KnotObject k where
@@ -65,6 +65,11 @@ class PD k where
   skeleton :: k i -> Skeleton i
   xings :: k i -> [Xing i]
 
+\end{code}
+The \hs{SX} form of a diagram just contains the \hs{Skeleton} and the \hs{Xing}s
+(crossings), while the \hs{RVT} form also assigns each arc an integral rotation
+number.
+\begin{code}
 data SX  i = SX  (Skeleton i) [Xing i] deriving (Show, Eq, Functor)
 data RVT i = RVT (Skeleton i) [Xing i] [(i,Int)] deriving (Show, Eq, Functor)
 
