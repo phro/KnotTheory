@@ -81,7 +81,12 @@ reindex k = fmap (fromJust . flip lookup table) k
   where
     table = zip (strandIndices s) [1..]
     s = skeleton k
-
+\end{code}
+Most importantly, we now declare that a diagram expressed in \hs{SX} form (that
+is, without any rotation data) may be assigned rotation numbers to each of its
+arcs in a meaningful way. The bulk of the work is done by \hs{getRotNums}, which
+is defined farther below.
+\begin{code}
 instance KnotObject SX where
   toSX = id
   toRVT k@(SX cs xs) = RVT cs xs rs where
