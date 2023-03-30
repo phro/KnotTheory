@@ -132,23 +132,8 @@ toList (Loop is)   = is
 strandIndices :: Skeleton i -> [i]
 strandIndices = concatMap toList
 
--- involves :: (Eq i) => Skeleton i -> Xing i -> i -> Bool
--- involves s x i = or $ map (Just i==)
-  -- [Just o, Just u, nextSkeletonIndex o s, prevSkeletonIndex u s]
-    -- where o = overStrand x
-          -- u = underStrand x
 involves :: (Eq i) => Xing i -> i -> Bool
 x `involves` k = k `elem` [underStrand x, overStrand x]
-
--- safeOtherArc :: Xing i -> i -> Maybe i
--- safeOtherArc (Xm i j) k
-  -- | k == i     = Just j
-  -- | k == j     = Just i
-  -- | otherwise = Nothing
--- safeOtherArc (Xp i j) k
-  -- | k == i     = Just j
-  -- | k == j     = Just i
-  -- | otherwise = Nothing
 
 otherArc :: (Eq i) => Xing i -> i -> Maybe i
 otherArc x i
