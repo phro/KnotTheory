@@ -101,8 +101,9 @@ instance PD RVT where
   skeleton (RVT s _ _) = s
   xings (RVT _ xs _)   = xs
 \end{code}
-
-Functions that manipulate planar diagrams.
+Next, we include a series of functions which answer basic questions about
+planar diagrams. Note in \hs{rotnum}, if a rotation number is not present in the
+table of values, it is assumed to be $0$.
 \begin{code}
 rotnums :: RVT i -> [(i,Int)]
 rotnums (RVT _ _ rs) = rs
