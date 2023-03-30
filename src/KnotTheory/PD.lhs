@@ -72,7 +72,10 @@ number.
 \begin{code}
 data SX  i = SX  (Skeleton i) [Xing i] deriving (Show, Eq, Functor)
 data RVT i = RVT (Skeleton i) [Xing i] [(i,Int)] deriving (Show, Eq, Functor)
-
+\end{code}
+Given any labelling of the arcs in a diagram, we can re-label the arcs using
+consecutive whole numbers. This is accomplised with \hs{reindex}:
+\begin{code}
 reindex :: (PD k, Functor k, Eq i) => k i -> k Int
 reindex k = fmap (fromJust . flip lookup table) k
   where
