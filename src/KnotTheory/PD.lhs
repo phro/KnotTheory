@@ -144,17 +144,10 @@ otherArc x i
         u = underStrand x
 
 next :: (Eq i) => i -> Strand i -> Maybe i
-next i (x:y:ys)
-  | i == x = Just y
-  | otherwise = next i (y:ys)
-next _ _ = Nothing
--- next e = listToMaybe . drop 1 . dropWhile (/= e)
+next e = listToMaybe . drop 1 . dropWhile (/= e)
 
 prev :: (Eq i) => i -> Strand i -> Maybe i
-prev i (x:y:ys)
-  | i == y = Just x
-  | otherwise = prev i (y:ys)
-prev _ _ = Nothing
+prev e = next e . reverse
 
 nextCyc :: (Eq i) => i -> Loop i -> Maybe i
 nextCyc e xs = next e . take (length xs + 1). cycle $ xs
