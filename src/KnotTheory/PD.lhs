@@ -226,7 +226,12 @@ diagram. This curve is characterized by the arcs it passes through, together
 with their orientations.
 \begin{code}
 type Front i = [(i,Dir)]
-
+\end{code}
+We obtain the rotation numbers by successively passing the front across new
+crossings (achieved by \hs{advanceFront}), keeping track of the rotation numbers
+of arcs which have already passed by the front. Once the front has passed across
+every crossing, all the rotation numbers have been computed.
+\begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
 getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return
 
@@ -234,9 +239,7 @@ advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront _ []           = return []
 advanceFront k f@(f1@(i,_):fs) =
   case find ((== i) . fst) fs of
-    Just (j,In ) -> (return (j,-1), fs')
-    Just (_,Out) -> return fs'
-    -- Just (i,dir) -> (return (i,-δ dir In), fs')
+    Just (i,dir) -> (return (i,-δ dir In), fs')
     Nothing      ->
       case findNextXing k f1 of
         Just x  -> absorbXing k x f
