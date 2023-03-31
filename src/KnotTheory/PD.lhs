@@ -114,7 +114,6 @@ rotnums :: RVT i -> [(i,Int)]
 rotnums (RVT _ _ rs) = rs
 
 rotnum :: (Eq i) => RVT i -> i -> Int
--- rotnum k i = fmap snd . find (\ir -> fst ir == i) $ rotnums k
 rotnum k i = fromMaybe 0 . lookup i . rotnums $ k
 
 isStrand :: Component i -> Bool
@@ -154,9 +153,6 @@ nextCyc e xs = next e . take (length xs + 1). cycle $ xs
 
 prevCyc :: (Eq i) => i -> Loop i -> Maybe i
 prevCyc e xs = prev e . take (length xs + 1). cycle $ xs
-
--- Philosophical question: should I be naming all these boolean functions or
--- should those be ebmedded into functions where this is wanted?
 
 isHeadOf :: (Eq i) => i -> [i] -> Bool
 x `isHeadOf` ys = x == head ys
@@ -202,31 +198,33 @@ getXingIndices s x = catMaybes [ Just o
                                o = overStrand x
                                u = underStrand x
 
-{-
- - Assumptions:
- -   1. k is a (1,n)-tangle (a tangle with only one open component)
- -   2. k is a planar diagram.
- -   3. k is a connected diagram.
- - toRVT outputs:
- -   1. a planar (1,n)-rotational virtual tangle
- -}
-
 δ :: (Eq a) => a -> a -> Int
 δ x y
-  | x == y     = 1
+  | x == y    = 1
   | otherwise = 0
 
--- toRVT k = toRVT . toSX $ k
-\end{code}
-
-PD to RVT conversion code
-\begin{code}
 mergeBy :: (Ord i) => ([a] -> b) -> [(i,a)] -> [(i,b)]
 mergeBy f = map (wrapIndex f) . groupBy ((==) `on` fst) . sortOn fst
   where
     wrapIndex :: ([a] -> b) -> [(i,a)] -> (i,b)
     wrapIndex g xs@(x:_) = (fst x, g . map snd $ xs)
+\end{code}
+Here we come to the main function, \hs{getRotNums}, for which we have the
+following requirements (not expressed in the code):
+\begin{enumerate}
+        \item The diagram \hs{k} is a $(1,n)$-tangle (a tangle with only one open component)
+        \item The underlying graph of \hs{k} is a planar. 
+        \item The diagram \hs{k} is a connected.
+\end{enumerate}
+Only in this case will the function \hs{toRVT} will then output a planar
+$(1,n)$-rotational virtual tangle which corresponds to a classical (i.e. planar)
+diagram.
 
+This function involves taking a simple open curve (a Jordan curve passing
+through infinity) called the \hs{Front}, and passing it over arcs in the
+diagram. This curve is characterized by the arcs it passes through, together
+with their orientations.
+\begin{code}
 type Front i = [(i,Dir)]
 
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
