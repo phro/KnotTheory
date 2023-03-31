@@ -4,7 +4,7 @@ manipulations and type-wrangling. The exact details are not too important.
 {-# LANGUAGE DeriveFunctor #-}
 module KnotTheory.PD where
 import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
-import Data.List (find, groupBy, sortOn, intersect, union, (\\))
+import Data.List (find, groupBy, sortOn, partition, intersect, union, (\\))
 import Data.Tuple (swap)
 import Data.Function (on)
 \end{code}
@@ -237,14 +237,15 @@ getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return
 
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront _ []           = return []
-advanceFront k f@(f1@(i,_):fs) =
-  case find ((== i) . fst) fs of
-    Just (i,dir) -> (return (i,-δ dir In), fs')
-    Nothing      ->
+advanceFront k f@(f1:fs) =
+  case fs1 of
+    (i, In):_ -> (return (i,-1), fss)
+    (i,Out):_ -> return fss           -- No new rotation numbers
+    []        ->
       case findNextXing k f1 of
         Just x  -> absorbXing k x f
         Nothing -> return fs
-  where fs' = filter ((/=i).fst) fs
+  where (fs1,fss) = partition (((==) `on` fst) f1) fs
 
 absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ _ [] = error "Front is empty."
