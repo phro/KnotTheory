@@ -247,6 +247,18 @@ advanceFront k f@(f1:fs) =
         Nothing -> return fs
   where (fs1,fss) = partition (((==) `on` fst) f1) fs
 
+absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
+absorbArc k []     = return []
+absorbArc k f@(f1:fs) = 
+        case fs1 of
+          (i, In):_ -> (return (i,-1), fss)
+          (i,Out):_ -> return fss           -- No new rotation numbers
+          []        -> return f 
+          where (fs1,fss) = partition (((==) `on` fst) f1) fs
+
+absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
+absorbArcs = undefined
+
 absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ _ [] = error "Front is empty."
 absorbXing k x ((i,d):fs) =
