@@ -265,6 +265,47 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           , ([(2,-1)] ,[(1,In), (3, Out)])
           ]
       ]
+  , "absorbArcs tests" ~: TestList $ 
+      [ "absorbArcs recursively absorbs all arcs that interact with the front twice."
+              ~: TestList $ zipWith
+          (let k = SX @Int [Loop [1]] []
+            in \f rf -> absorbArcs k f ~?= rf
+          )
+          [ [(1,Out), (1, In), (2,Out), (2, In)]
+          , [(1, In), (1,Out), (2, In), (2,Out)]
+          , [(2,Out), (1,In ), (2, In), (1,Out)]
+          , [(2, In), (1,Out), (2,Out), (1, In)]
+          ]
+          [ ([(1,-1),(2,-1)], [])
+          , ([]             , [])
+          , ([(2,-1)]       , [])
+          , ([(1,-1)]       , [])
+          ]
+      , "absorbArcs is identity on fronts whose first component is unique in the front."
+              ~: TestList $ zipWith
+          (let k = SX @Int [Loop [1]] []
+            in \f rf -> absorbArcs k f ~?= rf
+          )
+          [ [(1,Out), (2,In )]
+          , [(1,In ), (2,Out), (2, In)]
+          ]
+          [ ([], [(1,Out), (2,In )         ])
+          , ([], [(1,In ), (2,Out), (2, In)])
+          ]
+      , "absorbArcs absorbs arcs appropriately regardless of the presence of crossings."
+              ~: TestList $ zipWith
+          (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
+            in \f rf -> absorbArcs k f ~?= rf
+          )
+          [ [(1,Out), (1,In )]
+          , [(1,In ), (1,Out)]
+          , [(2,Out), (1, In), (2,In ), (1, Out)]
+          ]
+          [ ([(1,-1)] ,[])
+          , ([]       ,[])
+          , ([(2,-1)] ,[])
+          ]
+      ]
   , "absorbXing absorbs xing attached to first element of front" ~: TestList $
     [ TestList $ zipWith3
         (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
