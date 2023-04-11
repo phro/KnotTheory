@@ -236,7 +236,10 @@ Next, we define \hs{converge}, which iterates a function until a fixed point is
 achieved.
 \begin{code}
 converge :: (Eq a) => (a -> a) -> a -> a
-converge = undefined
+converge f x
+        | x == x'   = x
+        | otherwise = converge f x'
+        where x' = f x
 \end{code}
 \begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
