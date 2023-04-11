@@ -267,7 +267,7 @@ absorbArc k f@(f1:fs) =
           where (fs1,fss) = partition (((==) `on` fst) f1) fs
 
 absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
-absorbArcs = undefined
+absorbArcs k = converge (>>= absorbArc k) . return 
 
 absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ _ [] = error "Front is empty."
