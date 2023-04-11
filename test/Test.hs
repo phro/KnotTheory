@@ -395,10 +395,10 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
             , ([(1,1),(2,-1)],[])
             ]
     ]
-  , "advanceFront works when arc connects back to front" ~: TestList $
+  , "absorbArc works when arc connects back to front" ~: TestList $
       [ TestList $ zipWith
           (let k = SX @Int [Loop [1]] []
-            in \f rf -> advanceFront k f ~?= rf
+            in \f rf -> absorbArc k f ~?= rf
           )
           [ [(1,Out), (1,In )]
           , [(1,In ), (1,Out)]
@@ -412,7 +412,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           ]
       , TestList $ zipWith
           (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
-            in \f rf -> advanceFront k f ~?= rf
+            in \f rf -> absorbArc k f ~?= rf
           )
           [ [(1,Out), (1,In )]
           , [(1,In ), (1,Out)]
