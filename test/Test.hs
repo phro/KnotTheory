@@ -311,23 +311,21 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           ]
       ]
   , "absorbXing absorbs xing attached to first element of front" ~: TestList $
-    [ TestList $ zipWith3
+    [ TestList $ zipWith
         (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
-          in \f x rf -> absorbXing k x f ~?= rf
+          in \f rf -> absorbXing k f ~?= rf
         )
         (map return [(1,Out), (1,In), (2,Out),(2, In)])
-        [Xp 1 4, Xp 3 6, Xp 5 2, Xp 1 4]
         [ ([]     ,[(5,Out),(2,Out),(4,In )])
         , ([]     ,[(4,Out),(6,In ),(3,In )])
         , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
         , ([(5,1)],[(4,In ),(1,In ),(5,Out)])
         ]
-    , TestList $ zipWith3
+    , TestList $ zipWith
         (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xm 4 1, Xm 2 5, Xm 6 3]
-          in \f x rf -> absorbXing k x f ~?= rf
+          in \f rf -> absorbXing k f ~?= rf
         )
         (map return [(1,Out), (1,In), (2,Out),(2, In)])
-        [Xm 4 1, Xm 6 3, Xm 2 5, Xm 4 1]
         [ ([]     ,[(5,Out),(2,Out),(4,In )])
         , ([]     ,[(4,Out),(6,In ),(3,In )])
         , ([(5,1)],[(5,In ),(3,Out),(6,Out)])

@@ -253,7 +253,7 @@ advanceFront k f@(f1:fs) =
     (i,Out):_ -> return fss           -- No new rotation numbers
     []        ->
       case findNextXing k f1 of
-        Just x  -> absorbXing k x f
+        Just x  -> absorbXing k f
         Nothing -> return fs
   where (fs1,fss) = partition (((==) `on` fst) f1) fs
 
@@ -269,9 +269,9 @@ absorbArc k f@(f1:fs) =
 absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArcs k = converge (>>= absorbArc k) . return 
 
-absorbXing :: (Eq i) => SX i -> Xing i -> Front i -> ([(i,Int)],Front i)
-absorbXing _ _ [] = error "Front is empty."
-absorbXing k x ((i,d):fs) =
+absorbXing :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
+absorbXing _ [] = return []
+absorbXing k ((i,d):fs) =
   case d of
     Out
       | isPositive x == (i == underStrand x) ->
@@ -294,6 +294,7 @@ absorbXing k x ((i,d):fs) =
   where
     f  = mapMaybe (fmap swap . sequence . swap)
     s  = skeleton k
+    Just x  = findNextXing k (i,d)
 
 data Dir = In | Out
   deriving (Eq, Show)
