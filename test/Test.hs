@@ -382,7 +382,7 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           ]
       , "(>>= advanceFront)^n (Hopf link)" ~: TestList $
           zipWith (~?=)
-            ( take 6 $ iterate
+            ( take 5 $ iterate
                 ( let k = SX @Int [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
                    in (>>= advanceFront k)
                 )
@@ -391,7 +391,6 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
             [ ([(1,1)],[(1,Out)])
             , ([(1,1)],[(4,Out),(3,Out),(2,In)])
             , ([(1,1)],[(2,Out),(3,In),(3,Out),(2,In)])
-            , ([(1,1),(2,-1)],[(3,In),(3,Out)])
             , ([(1,1),(2,-1)],[])
             , ([(1,1),(2,-1)],[])
             ]
