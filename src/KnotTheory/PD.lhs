@@ -250,7 +250,7 @@ getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
 getRotNums k = return >>> converge (>>= advanceFront k) >>> fst
 
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
-advanceFront k = return >>> (converge (>>= absorbArc k) >=> absorbXing k)
+advanceFront k = return >>> converge (>>= absorbArc k) >=> absorbXing k
 
 absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArc k []     = return []
