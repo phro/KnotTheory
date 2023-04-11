@@ -85,14 +85,18 @@ reindex k = fmap (fromJust . flip lookup table) k
 Most importantly, we now declare that a diagram expressed in \hs{SX} form (that
 is, without any rotation data) may be assigned rotation numbers to each of its
 arcs in a meaningful way. The bulk of the work is done by \hs{getRotNums}, which
-is defined farther below.
+is defined farther below. We handle the case where the entire tangle is a single
+crossingless strand separately.
 \begin{code}
 instance KnotObject SX where
   toSX = id
   toRVT k@(SX cs xs) = RVT cs xs rs where
-    rs = filter ((/=0) . snd) . mergeBy sum $ getRotNums k [(i1,Out)]
+    rs = filter ((/=0) . snd) . mergeBy sum $ getRotNums k f1
     i1 = head . toList $ s
     Just s = find isStrand cs
+    f1 = case next i1 (toList s) of
+            Just _  -> [(i1,Out)]
+            Nothing -> []
 
 instance KnotObject RVT where
   toRVT = id
