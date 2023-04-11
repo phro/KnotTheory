@@ -246,16 +246,7 @@ getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
 getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return
 
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
-advanceFront _ []           = return []
-advanceFront k f@(f1:fs) =
-  case fs1 of
-    (i, In):_ -> (return (i,-1), fss)
-    (i,Out):_ -> return fss           -- No new rotation numbers
-    []        ->
-      case findNextXing k f1 of
-        Just x  -> absorbXing k f
-        Nothing -> return fs
-  where (fs1,fss) = partition (((==) `on` fst) f1) fs
+advanceFront k = return >>> (converge (>>= absorbArc k) >=> absorbXing k)
 
 absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArc k []     = return []

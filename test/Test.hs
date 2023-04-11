@@ -350,9 +350,11 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           )
           [ ([(1,1)],[(1,Out)])
           , ([(1,1)],[(2,Out),(1,In),(1,Out),(2,In)])
+          , ([(1,1)],[(1,In),(2,Out),(1,Out),(2,In),(3,Out)])
           ]
           [ ([(1,1)],[(5,Out),(2,Out),(4,In)])
-          , ([(1,1),(2,-1)],[(1,In),(1,Out)])
+          , ([(1,1),(2,-1)],[])
+          , ([(1,1),(2,-1)],[(1,Out),(4,Out),(6,In)])
           ]
       , "(>>= advanceFront)^○2" ~: TestList $ zipWith
           ( \f rf ->
