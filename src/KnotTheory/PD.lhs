@@ -231,6 +231,13 @@ We obtain the rotation numbers by successively passing the front across new
 crossings (achieved by \hs{advanceFront}), keeping track of the rotation numbers
 of arcs which have already passed by the front. Once the front has passed across
 every crossing, all the rotation numbers have been computed.
+
+Next, we define \hs{converge}, which iterates a function until a fixed point is
+achieved.
+\begin{code}
+converge :: (Eq a) => (a -> a) -> a -> a
+converge = undefined
+\end{code}
 \begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
 getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return

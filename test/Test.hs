@@ -49,6 +49,10 @@ helperFunctionTests = "Helper functions" ~: TestList
   , "mergeBy merges dictionaries with concat" ~:
       mergeBy @Int @[Int] concat [(1,[1,11,111]),(2,[2,22,222]),(1,[-1,-11])] ~?=
         [(1,[1,11,111,-1,-11]),(2,[2,22,222])]
+  , "converge converges to a fixed point." ~:
+    [ converge (*0) 1 ~?= (0 :: Int)
+    , converge (\xs -> if null xs then xs else tail xs) [(1::Int)..10] ~?= []
+    ]
   ]
 
 xingTests :: Test
