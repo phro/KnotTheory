@@ -270,18 +270,18 @@ absorbXing k ((i,d):fs) =
   case d of
     Out
       | isPositive x == (i == underStrand x) ->
-        (m [(j,1)],m [(j ,In ),(i',Out),(j',Out)] ++ fs)
+        (m [(j,1)],m [(j ,In ),(i',d),(j',Out)] ++ fs)
       | otherwise ->
-        return $ m [(j',Out),(i',Out),(j ,In )] ++ fs
+        return $ m [(j',Out),(i',d),(j ,In )] ++ fs
       where
         i' = nextSkeletonIndex s i
         j  = otherArc x i
         j' = j >>= nextSkeletonIndex s
     In
       | isPositive x == (i' == Just (overStrand x)) ->
-        (m [(j',1)],m [(j ,In ),(i',In),(j',Out)] ++ fs)
+        (m [(j',1)],m [(j ,In ),(i',d),(j',Out)] ++ fs)
       | otherwise ->
-        return $ m [(j',Out),(i',In),(j ,In )] ++ fs
+        return $ m [(j',Out),(i',d),(j ,In )] ++ fs
       where
         i' = prevSkeletonIndex s i
         j  = i' >>= otherArc x
