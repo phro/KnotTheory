@@ -270,24 +270,24 @@ absorbXing k ((i,d):fs) =
   case d of
     Out
       | isPositive x == (i == underStrand x) ->
-        (f [(j,1)],f [(j ,In ),(i',Out),(j',Out)] ++ fs)
+        (m [(j,1)],m [(j ,In ),(i',Out),(j',Out)] ++ fs)
       | otherwise ->
-        return $ f [(j',Out),(i',Out),(j ,In )] ++ fs
+        return $ m [(j',Out),(i',Out),(j ,In )] ++ fs
       where
         i' = nextSkeletonIndex s i
         j  = otherArc x i
         j' = j >>= nextSkeletonIndex s
     In
       | isPositive x == (i' == Just (overStrand x)) ->
-        (f [(j',1)],f [(j ,In ),(i',In),(j',Out)] ++ fs)
+        (m [(j',1)],m [(j ,In ),(i',In),(j',Out)] ++ fs)
       | otherwise ->
-        return $ f [(j',Out),(i',In),(j ,In )] ++ fs
+        return $ m [(j',Out),(i',In),(j ,In )] ++ fs
       where
         i' = prevSkeletonIndex s i
         j  = i' >>= otherArc x
         j' = j  >>= nextSkeletonIndex s
   where
-    f  = mapMaybe (fmap swap . sequence . swap)
+    m  = mapMaybe (fmap swap . sequence . swap)
     s  = skeleton k
     Just x  = findNextXing k (i,d)
 
