@@ -247,7 +247,7 @@ converge f x
 \end{code}
 \begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
-getRotNums k = fst . until (null . snd) (>>= advanceFront k) . return
+getRotNums k = return >>> converge (>>= advanceFront k) >>> fst
 
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront k = return >>> (converge (>>= absorbArc k) >=> absorbXing k)
