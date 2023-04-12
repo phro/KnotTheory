@@ -182,14 +182,14 @@ knotObjectTests = "KnotObject operations" ~: TestList
           (SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]) d
           ~?= Just x
         )
-        [(1,Out), (2,Out), (3,In), (6,Out), (1,In)]
+        [(Out,1), (Out,2), (In,3), (Out,6), (In,1)]
         [Xp 1 4 , Xp 5 2 , Xp 5 2, Xp 3 6 , Xp 3 6]
   , "findNextXing fails to find next Xing" ~: TestList $
     map
       (let k = SX @Int [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
         in \d -> findNextXing k d ~?= Nothing
       )
-    [(1,In), (7,In), (7,Out)]
+    [(In,1), (In,7), (Out,7)]
   ]
 
 testRVTs :: [RVT Int]
@@ -234,39 +234,39 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           (let k = SX @Int [Loop [1]] []
             in \f rf -> absorbArc k f ~?= rf
           )
-          [ [(1,Out), (1,In )]
-          , [(1,In ), (1,Out)]
-          , [(2,Out), (1, In), (2,In ), (3, Out)]
-          , [(2,In ), (1, In), (2,Out), (3, Out)]
+          [ [(Out,1), (In ,1)]
+          , [(In ,1), (Out,1)]
+          , [(Out,2), (In ,1), (In ,2), (Out,3)]
+          , [(In ,2), (In ,1), (Out,2), (Out,3)]
           ]
           [ ([(1,-1)] ,[])
           , ([]       ,[])
-          , ([(2,-1)] ,[(1,In), (3, Out)])
-          , ([]       ,[(1,In), (3, Out)])
+          , ([(2,-1)] ,[(In,1), (Out,3)])
+          , ([]       ,[(In,1), (Out,3)])
           ]
       , "absorbArc is identity on fronts whose first component is unique in the front."
               ~: TestList $ zipWith
           (let k = SX @Int [Loop [1]] []
             in \f rf -> absorbArc k f ~?= rf
           )
-          [ [(1,Out), (2,In )]
-          , [(1,In ), (2,Out)]
+          [ [(Out,1), (In ,2)]
+          , [(In ,1), (Out,2)]
           ]
-          [ ([], [(1,Out), (2,In )])
-          , ([], [(1,In ), (2,Out)])
+          [ ([], [(Out,1), (In ,2)])
+          , ([], [(In ,1), (Out,2)])
           ]
       , "absorbArc absorbs arcs appropriately regardless of the presence of crossings."
               ~: TestList $ zipWith
           (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
             in \f rf -> absorbArc k f ~?= rf
           )
-          [ [(1,Out), (1,In )]
-          , [(1,In ), (1,Out)]
-          , [(2,Out), (1, In), (2,In ), (3, Out)]
+          [ [(Out,1), (In ,1)]
+          , [(In ,1), (Out,1)]
+          , [(Out,2), (In,1), (In ,2), (Out,3)]
           ]
           [ ([(1,-1)] ,[])
           , ([]       ,[])
-          , ([(2,-1)] ,[(1,In), (3, Out)])
+          , ([(2,-1)] ,[(In,1), (Out,3)])
           ]
       ]
   , "absorbArcs tests" ~: TestList $ 
@@ -275,10 +275,10 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           (let k = SX @Int [Loop [1]] []
             in \f rf -> absorbArcs k f ~?= rf
           )
-          [ [(1,Out), (1, In), (2,Out), (2, In)]
-          , [(1, In), (1,Out), (2, In), (2,Out)]
-          , [(2,Out), (1,In ), (2, In), (1,Out)]
-          , [(2, In), (1,Out), (2,Out), (1, In)]
+          [ [(Out,1), (In,1), (Out,2), (In,2)]
+          , [(In,1), (Out,1), (In,2), (Out,2)]
+          , [(Out,2), (In ,1), (In,2), (Out,1)]
+          , [(In,2), (Out,1), (Out,2), (In,1)]
           ]
           [ ([(1,-1),(2,-1)], [])
           , ([]             , [])
@@ -290,20 +290,20 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           (let k = SX @Int [Loop [1]] []
             in \f rf -> absorbArcs k f ~?= rf
           )
-          [ [(1,Out), (2,In )]
-          , [(1,In ), (2,Out), (2, In)]
+          [ [(Out,1), (In ,2)]
+          , [(In ,1), (Out,2), (In,2)]
           ]
-          [ ([], [(1,Out), (2,In )         ])
-          , ([], [(1,In ), (2,Out), (2, In)])
+          [ ([], [(Out,1), (In ,2)         ])
+          , ([], [(In ,1), (Out,2), (In,2)])
           ]
       , "absorbArcs absorbs arcs appropriately regardless of the presence of crossings."
               ~: TestList $ zipWith
           (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
             in \f rf -> absorbArcs k f ~?= rf
           )
-          [ [(1,Out), (1,In )]
-          , [(1,In ), (1,Out)]
-          , [(2,Out), (1, In), (2,In ), (1, Out)]
+          [ [(Out,1), (In ,1)]
+          , [(In ,1), (Out,1)]
+          , [(Out,2), (In,1), (In ,2), (Out,1)]
           ]
           [ ([(1,-1)] ,[])
           , ([]       ,[])
@@ -315,21 +315,21 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
         (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
           in \f rf -> absorbXing k f ~?= rf
         )
-        (map return [(1,Out), (1,In), (2,Out),(2, In)])
-        [ ([]     ,[(5,Out),(2,Out),(4,In )])
-        , ([]     ,[(4,Out),(6,In ),(3,In )])
-        , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
-        , ([(5,1)],[(4,In ),(1,In ),(5,Out)])
+        (map return [(Out,1), (In,1), (Out,2),(In,2)])
+        [ ([]     ,[(Out,5),(Out,2),(In ,4)])
+        , ([]     ,[(Out,4),(In ,6),(In ,3)])
+        , ([(5,1)],[(In ,5),(Out,3),(Out,6)])
+        , ([(5,1)],[(In ,4),(In ,1),(Out,5)])
         ]
     , TestList $ zipWith
         (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xm 4 1, Xm 2 5, Xm 6 3]
           in \f rf -> absorbXing k f ~?= rf
         )
-        (map return [(1,Out), (1,In), (2,Out),(2, In)])
-        [ ([]     ,[(5,Out),(2,Out),(4,In )])
-        , ([]     ,[(4,Out),(6,In ),(3,In )])
-        , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
-        , ([(5,1)],[(4,In ),(1,In ),(5,Out)])
+        (map return [(Out,1), (In,1), (Out,2),(In,2)])
+        [ ([]     ,[(Out,5),(Out,2),(In ,4)])
+        , ([]     ,[(Out,4),(In ,6),(In ,3)])
+        , ([(5,1)],[(In ,5),(Out,3),(Out,6)])
+        , ([(5,1)],[(In ,4),(In ,1),(Out,5)])
         ]
     ]
   , "advanceFront works when xing present" ~: TestList $
@@ -337,10 +337,10 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
       (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
         in \f rf -> advanceFront k f ~?= rf
       )
-      (map return [(1,Out), (1,In), (2,Out)])
-      [ ([]     ,[(5,Out),(2,Out),(4,In )])
-      , ([]     ,[(4,Out),(6,In ),(3,In )])
-      , ([(5,1)],[(5,In ),(3,Out),(6,Out)])
+      (map return [(Out,1), (In,1), (Out,2)])
+      [ ([]     ,[(Out,5),(Out,2),(In ,4)])
+      , ([]     ,[(Out,4),(In ,6),(In ,3)])
+      , ([(5,1)],[(In ,5),(Out,3),(Out,6)])
       ]
   , "(>>= advanceFront) chains properly" ~: TestList $
       [ "(>>= advanceFront)" ~: TestList $ zipWith
@@ -348,37 +348,37 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
             let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
              in (f >>= advanceFront k) ~?= rf
           )
-          [ ([(1,1)],[(1,Out)])
-          , ([(1,1)],[(2,Out),(1,In),(1,Out),(2,In)])
-          , ([(1,1)],[(1,In),(2,Out),(1,Out),(2,In),(3,Out)])
+          [ ([(1,1)],[(Out,1)])
+          , ([(1,1)],[(Out,2),(In,1),(Out,1),(In,2)])
+          , ([(1,1)],[(In,1),(Out,2),(Out,1),(In,2),(Out,3)])
           ]
-          [ ([(1,1)],[(5,Out),(2,Out),(4,In)])
+          [ ([(1,1)],[(Out,5),(Out,2),(In,4)])
           , ([(1,1),(2,-1)],[])
-          , ([(1,1),(2,-1)],[(1,Out),(4,Out),(6,In)])
+          , ([(1,1),(2,-1)],[(Out,1),(Out,4),(In,6)])
           ]
       , "(>>= advanceFront)^○2" ~: TestList $ zipWith
           ( \f rf ->
             let k = SX @Int [Strand [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
              in (f >>= advanceFront k >>= advanceFront k) ~?= rf
           )
-          [ ([(1,1)],[(1,In),(1,Out)])
-          , ([(1,1)],[(2,Out),(1,In),(1,Out),(2,In)])
-          , ([],[(1,In),(2,Out),(1,Out),(2,In),(3,Out)])
+          [ ([(1,1)],[(In,1),(Out,1)])
+          , ([(1,1)],[(Out,2),(In,1),(Out,1),(In,2)])
+          , ([],[(In,1),(Out,2),(Out,1),(In,2),(Out,3)])
           ]
           [ ([(1,1)],[])
           , ([(1,1),(2,-1)],[])
-          , ([(2,-1),(1,1)],[(1,In),(5,Out),(2,Out),(6,In)])
+          , ([(2,-1),(1,1)],[(In,1),(Out,5),(Out,2),(In,6)])
           ]
       , "(>>= advanceFront) Hopf link" ~: TestList $ zipWith
           ( \f rf ->
             let k = SX @Int [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
              in (f >>= advanceFront k) ~?= rf
           )
-          [ ([(1,1)],[(1,Out)])
-          , ([(2,1)],[(2,Out)])
+          [ ([(1,1)],[(Out,1)])
+          , ([(2,1)],[(Out,2)])
           ]
-          [ ([(1,1)],      [(4,Out),(3,Out),(2,In)])
-          , ([(2,1),(1,1)],[(1,In),(4,Out),(3,Out)])
+          [ ([(1,1)],      [(Out,4),(Out,3),(In,2)])
+          , ([(2,1),(1,1)],[(In,1),(Out,4),(Out,3)])
           ]
       , "(>>= advanceFront)^n (Hopf link)" ~: TestList $
           zipWith (~?=)
@@ -386,11 +386,11 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
                 ( let k = SX @Int [Strand [1,3], Loop [2,4]] [Xp 1 2, Xp 4 3]
                    in (>>= advanceFront k)
                 )
-                ([(1,1)],[(1,Out)])
+                ([(1,1)],[(Out,1)])
             )
-            [ ([(1,1)],[(1,Out)])
-            , ([(1,1)],[(4,Out),(3,Out),(2,In)])
-            , ([(1,1)],[(2,Out),(3,In),(3,Out),(2,In)])
+            [ ([(1,1)],[(Out,1)])
+            , ([(1,1)],[(Out,4),(Out,3),(In,2)])
+            , ([(1,1)],[(Out,2),(In,3),(Out,3),(In,2)])
             , ([(1,1),(2,-1)],[])
             , ([(1,1),(2,-1)],[])
             ]
@@ -400,32 +400,32 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
           (let k = SX @Int [Loop [1]] []
             in \f rf -> absorbArc k f ~?= rf
           )
-          [ [(1,Out), (1,In )]
-          , [(1,In ), (1,Out)]
-          , [(2,Out), (1, In), (2,In ), (3, Out)]
-          , [(2,In ), (1, In), (2,Out), (3, Out)]
+          [ [(Out,1), (In ,1)]
+          , [(In ,1), (Out,1)]
+          , [(Out,2), (In,1), (In ,2), (Out,3)]
+          , [(In ,2), (In,1), (Out,2), (Out,3)]
           ]
           [ ([(1,-1)] ,[])
           , ([]       ,[])
-          , ([(2,-1)] ,[(1,In), (3, Out)])
-          , ([]       ,[(1,In), (3, Out)])
+          , ([(2,-1)] ,[(In,1), (Out,3)])
+          , ([]       ,[(In,1), (Out,3)])
           ]
       , TestList $ zipWith
           (let k = SX @Int [Loop [1,2,3,4,5,6]] [Xp 1 4, Xp 5 2, Xp 3 6]
             in \f rf -> absorbArc k f ~?= rf
           )
-          [ [(1,Out), (1,In )]
-          , [(1,In ), (1,Out)]
-          , [(2,Out), (1, In), (2,In ), (3, Out)]
+          [ [(Out,1), (In ,1)]
+          , [(In ,1), (Out,1)]
+          , [(Out,2), (In,1), (In ,2), (Out,3)]
           ]
           [ ([(1,-1)] ,[])
           , ([]       ,[])
-          , ([(2,-1)] ,[(1,In), (3, Out)])
+          , ([(2,-1)] ,[(In,1), (Out,3)])
           ]
       ]
   , "getRotNums tests" ~: TestList
-      [ getRotNums (SX @Int [Loop [1]] []) [(1,In ),(1,Out)] ~?= []
-      , getRotNums (SX @Int [Loop [1]] []) [(1,Out),(1,In )] ~?= [(1,-1)]
+      [ getRotNums (SX @Int [Loop [1]] []) [(In ,1),(Out,1)] ~?= []
+      , getRotNums (SX @Int [Loop [1]] []) [(Out,1),(In ,1)] ~?= [(1,-1)]
       ]
   ]
 

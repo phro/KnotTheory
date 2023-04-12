@@ -97,7 +97,7 @@ instance KnotObject SX where
     i1 = head . toList $ s
     Just s = find isStrand cs
     f1 = case next i1 (toList s) of
-            Just _  -> [(i1,Out)]
+            Just _  -> [(Out,i1)]
             Nothing -> []
 
 instance KnotObject RVT where
@@ -231,7 +231,7 @@ through infinity) called the \hs{Front}, and passing it over arcs in the
 diagram. This curve is characterized by the arcs it passes through, together
 with their orientations.
 \begin{code}
-type Front i = [(i,Dir)]
+type Front i = [(Dir,i)]
 \end{code}
 We obtain the rotation numbers by successively passing the front across new
 crossings (achieved by \hs{advanceFront}), keeping track of the rotation numbers
@@ -258,49 +258,50 @@ absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArc k []     = return []
 absorbArc k f@(f1:fs) = 
         case fs1 of
-          (i, In):_ -> (return (i,-1), fss)
-          (i,Out):_ -> return fss           -- No new rotation numbers
+          ( In,i):_ -> (return (i,-1), fss)
+          (Out,i):_ -> return fss           -- No new rotation numbers
           []        -> return f 
-          where (fs1,fss) = partition (((==) `on` fst) f1) fs
+          where (fs1,fss) = partition (((==) `on` snd) f1) fs
 
 absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArcs k = converge (>>= absorbArc k) . return 
 
 absorbXing :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ [] = return []
-absorbXing k ((i,d):fs) =
+absorbXing k ((d,i):fs) =
   case d of
     Out
       | isPositive x == (i == underStrand x) ->
-        (m [(j,1)],m [(j ,In ),(i',d),(j',Out)] ++ fs)
+        (map swap . m $ [(1,j)],m [(In,j),(d,i'),(Out,j')] ++ fs)
       | otherwise ->
-        return $ m [(j',Out),(i',d),(j ,In )] ++ fs
+        return $ m [(Out,j'),(d,i'),(In,j)] ++ fs
       where
         i' = nextSkeletonIndex s i
         j  = otherArc x i
         j' = j >>= nextSkeletonIndex s
     In
       | isPositive x == (i' == Just (overStrand x)) ->
-        (m [(j',1)],m [(j ,In ),(i',d),(j',Out)] ++ fs)
+        (map swap . m $ [(1,j')],m [(In, j),(d,i'),(Out,j')] ++ fs)
       | otherwise ->
-        return $ m [(j',Out),(i',d),(j ,In )] ++ fs
+        return $ m [(Out,j'),(d,i'),(In,j)] ++ fs
       where
         i' = prevSkeletonIndex s i
         j  = i' >>= otherArc x
         j' = j  >>= nextSkeletonIndex s
   where
-    m  = mapMaybe (fmap swap . sequence . swap)
+    m :: [(a,Maybe i)] -> [(a,i)]
+    m  = mapMaybe sequence
     s  = skeleton k
-    Just x  = findNextXing k (i,d)
+    Just x  = findNextXing k (d,i)
 
 data Dir = In | Out
   deriving (Eq, Show)
 -- There should be cleaner functions to deal with xings and their associated
 -- strands.
 
-findNextXing :: (Eq i, PD k) => k i -> (i,Dir) -> Maybe (Xing i)
-findNextXing k (i,Out) = find (`involves` i) $ xings k
-findNextXing k (i,In ) = do
+findNextXing :: (Eq i, PD k) => k i -> (Dir,i) -> Maybe (Xing i)
+findNextXing k (Out,i) = find (`involves` i) $ xings k
+findNextXing k (In ,i) = do
   i' <- prevSkeletonIndex (skeleton k) i
   find (`involves` i') $ xings k
   -- (prevSkeletonIndex i $ skeleton k) >>= (\i' -> find (`involves` i') $ xings k)
