@@ -7,6 +7,8 @@ import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
 import Data.List (find, groupBy, sortOn, partition, intersect, union, (\\))
 import Data.Tuple (swap)
 import Data.Function (on)
+import Control.Monad ((>=>))
+import Control.Arrow ((>>>))
 \end{code}
 Next, we introduce the crossing type, which can be either positive \hs{Xp} or
 negative \hs{Xm} (using the mnemonic \enquote{plus} and \enquote{minus}):
