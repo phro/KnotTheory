@@ -298,6 +298,21 @@ data Dir = In | Out
   deriving (Eq, Show)
 -- There should be cleaner functions to deal with xings and their associated
 -- strands.
+\end{code}
+
+The following functions take a location and a direction, returning the location
+and direction one sees when looking in the corresponding direction. Since it is
+possible for the resulting gaze to be merely the boundary, it is possible for
+these functions to return \hs{Nothing}.
+\begin{code}
+lookLeft  :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
+lookLeft = undefined
+
+lookAlong :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
+lookAlong = undefined
+
+lookRight :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
+lookRight = undefined
 
 findNextXing :: (Eq i, PD k) => k i -> (Dir,i) -> Maybe (Xing i)
 findNextXing k (Out,i) = find (`involves` i) $ xings k
