@@ -309,7 +309,8 @@ lookLeft  :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
 lookLeft = undefined
 
 lookAlong :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
-lookAlong = undefined
+lookAlong k (Out, i) = sequence (Out, nextSkeletonIndex (skeleton k) i) 
+lookAlong k (In , i) = sequence (In , prevSkeletonIndex (skeleton k) i) 
 
 lookRight :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
 lookRight = undefined
