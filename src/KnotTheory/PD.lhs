@@ -310,8 +310,8 @@ lookSide isLeft k di@(Out,i) = do
         x <- findNextXing k di
         j <- otherArc x i
         if isLeft == ((underStrand x == i) == isPositive x)
-         then return (In, j)
-         else sequence (Out, nextSkeletonIndex (skeleton k) j)
+        then return (In, j)
+        else sequence (Out, nextSkeletonIndex (skeleton k) j)
 lookSide isLeft k (In,i) = sequence (Out, prevSkeletonIndex (skeleton k) i) >>=
         lookSide (not isLeft) k 
 
