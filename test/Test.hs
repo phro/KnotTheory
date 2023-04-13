@@ -191,100 +191,154 @@ knotObjectTests = "KnotObject operations" ~: TestList
       )
     [(In,1), (In,7), (Out,7)]
   , let
-            pS  = SX @Int [Strand[1,2], Strand[3]] [Xp 1 3]
-            mS  = SX @Int [Strand[1,2], Strand[3]] [Xm 1 3]
-            pS2 = SX @Int [Strand[1], Strand[3]] [Xp 1 3]
-            mS2 = SX @Int [Strand[1], Strand[3]] [Xm 1 3]
-            pL  = SX @Int [Loop[1,2], Loop[3,4]] [Xp 1 3]
-            mL  = SX @Int [Loop[1,2], Loop[3,4]] [Xm 1 3]
+            pSt  = SX @Int [Strand[1,2], Strand[3]] [Xp 1 3]
+            mSt  = SX @Int [Strand[1,2], Strand[3]] [Xm 1 3]
+            pSt2 = SX @Int [Strand[1],   Strand[3]] [Xp 1 3]
+            mSt2 = SX @Int [Strand[1],   Strand[3]] [Xm 1 3]
+            pLt  = SX @Int [Loop[1,2],   Loop[3,4]] [Xp 1 3]
+            mLt  = SX @Int [Loop[1,2],   Loop[3,4]] [Xm 1 3]
+            pSb  = SX @Int [Strand[1,2], Strand[3]] [Xp 3 1]
+            mSb  = SX @Int [Strand[1,2], Strand[3]] [Xm 3 1]
+            pSb2 = SX @Int [Strand[1],   Strand[3]] [Xp 3 1]
+            mSb2 = SX @Int [Strand[1],   Strand[3]] [Xm 3 1]
+            pLb  = SX @Int [Loop[1,2],   Loop[3,4]] [Xp 3 1]
+            mLb  = SX @Int [Loop[1,2],   Loop[3,4]] [Xm 3 1]
      in "look tests" ~: TestList $
              [ "lookLeft" ~: TestList $
                      [ "Out" ~: TestList $
                              [ "positive" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookLeft  pS (Out,1) ~?= Nothing
-                                     , "with new arc" ~:
-                                        lookLeft  pL (Out,1) ~?= Just (Out,4)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookLeft  pSt (Out,1) ~?= Nothing
+                                             , lookLeft  pSb (Out,1) ~?= Just (In ,3)
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookLeft  pLt (Out,1) ~?= Just (Out,4)
+                                             , lookLeft  pLb (Out,1) ~?= Just (In ,3)
+                                             ]
                                      ]
                              , "negative" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookLeft  mS (Out,1) ~?= Just (In ,3)
-                                     , "with new arc" ~:
-                                        lookLeft  mL (Out,1) ~?= Just (In ,3)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookLeft  mSt (Out,1) ~?= Just (In ,3)
+                                             , lookLeft  mSb (Out,1) ~?= Nothing
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookLeft  mLt (Out,1) ~?= Just (In ,3)
+                                             , lookLeft  mLb (Out,1) ~?= Just (Out,4)
+                                             ]
                                      ]
                              ]
                      , "In" ~: TestList $
                              [ "positive" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookLeft  pS (In ,2) ~?= Just (In ,3)
-                                     , "with new arc" ~:
-                                        lookLeft  pL (In ,2) ~?= Just (In ,3)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookLeft  pSt (In ,2) ~?= Just (In ,3)
+                                             , lookLeft  pSb (In ,2) ~?= Nothing
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookLeft  pLt (In ,2) ~?= Just (In ,3)
+                                             , lookLeft  pLb (In ,2) ~?= Just (Out,4)
+                                             ]
                                      ]
                              , "negative" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookLeft  mS (In ,2) ~?= Nothing
-                                     , "with new arc" ~:
-                                        lookLeft  mL (In ,2) ~?= Just (Out,4)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookLeft  mSt (In ,2) ~?= Nothing
+                                             , lookLeft  mSb (In ,2) ~?= Just (In ,3)
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookLeft  mLt (In ,2) ~?= Just (Out,4)
+                                             , lookLeft  mLb (In ,2) ~?= Just (In ,3)
+                                             ]
                                      ]
                              ]
                      ]
              , "lookRight" ~: TestList $
                      [ "Out" ~: TestList $
                              [ "positive" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookRight pS (Out,1) ~?= Just (In ,3)
-                                     , "with new arc" ~:                    
-                                        lookRight pL (Out,1) ~?= Just (In ,3)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookRight pSt (Out,1) ~?= Just (In ,3)
+                                             , lookRight pSb (Out,1) ~?= Nothing
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookRight pLt (Out,1) ~?= Just (In ,3)
+                                             , lookRight pLb (Out,1) ~?= Just (Out,4)
+                                             ]
                                      ]
                              , "negative" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookRight mS (Out,1) ~?= Nothing
-                                     , "with new arc" ~:        
-                                        lookRight mL (Out,1) ~?= Just (Out,4)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookRight mSt (Out,1) ~?= Nothing
+                                             , lookRight mSb (Out,1) ~?= Just (In ,3)
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookRight mLt (Out,1) ~?= Just (Out,4)
+                                             , lookRight mLb (Out,1) ~?= Just (In ,3)
+                                             ]
                                      ]
                              ]
                      , "In" ~: TestList $
                              [ "positive" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookRight pS (In ,2) ~?= Nothing
-                                     , "with new arc" ~:       
-                                        lookRight pL (In ,2) ~?= Just (Out,4)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookRight pSt (In ,2) ~?= Nothing
+                                             , lookRight pSb (In ,2) ~?= Just (In ,3)
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookRight pLt (In ,2) ~?= Just (Out,4)
+                                             , lookRight pLb (In ,2) ~?= Just (In ,3)
+                                             ]
                                      ]
                              , "negative" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookRight mS (In ,2) ~?= Just (In ,3)
-                                     , "with new arc" ~:                   
-                                        lookRight mL (In ,2) ~?= Just (In ,3)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookRight mSt (In ,2) ~?= Just (In ,3)
+                                             , lookRight mSb (In ,2) ~?= Nothing
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookRight mLt (In ,2) ~?= Just (In ,3)
+                                             , lookRight mLb (In ,2) ~?= Just (Out,4)
+                                             ]
                                      ]
                              ]
                      ]
              , "lookAlong" ~: TestList $
                      [ "Out" ~: TestList $
                              [ "positive" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookAlong pS2 (Out,1) ~?= Nothing
-                                     , "with new arc" ~:                    
-                                        lookAlong pL (Out,1) ~?= Just (Out,2)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookAlong pSt2 (Out,1) ~?= Nothing
+                                             , lookAlong pSb2 (Out,1) ~?= Nothing
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookAlong pLt (Out,1) ~?= Just (Out,2)
+                                             , lookAlong pLb (Out,1) ~?= Just (Out,2)
+                                             ]
                                      ]
                              , "negative" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookAlong mS2 (Out,1) ~?= Nothing
-                                     , "with new arc" ~:        
-                                        lookAlong mL (Out,1) ~?= Just (Out,2)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookAlong mSt2 (Out,1) ~?= Nothing
+                                             , lookAlong mSb2 (Out,1) ~?= Nothing
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookAlong mLt (Out,1) ~?= Just (Out,2)
+                                             , lookAlong mLb (Out,1) ~?= Just (Out,2)
+                                             ]
                                      ]
                              ]
                      , "In" ~: TestList $
                              [ "positive" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookAlong pS (In ,2) ~?= Just (In ,1)
-                                     , "with new arc" ~:       
-                                        lookAlong pL (In ,2) ~?= Just (In ,1)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookAlong pSt (In ,2) ~?= Just (In ,1)
+                                             , lookAlong pSb (In ,2) ~?= Just (In ,1)
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookAlong pLt (In ,2) ~?= Just (In ,1)
+                                             , lookAlong pLb (In ,2) ~?= Just (In ,1)
+                                             ]
                                      ]
                              , "negative" ~: TestList $
-                                     [ "with boundary arc" ~:
-                                        lookAlong mS (In ,2) ~?= Just (In ,1)
-                                     , "with new arc" ~:                   
-                                        lookAlong mL (In ,2) ~?= Just (In ,1)
+                                     [ "with boundary arc" ~: TestList $
+                                             [ lookAlong mSt (In ,2) ~?= Just (In ,1)
+                                             , lookAlong mSb (In ,2) ~?= Just (In ,1)
+                                             ]
+                                     , "with new arc" ~: TestList $
+                                             [ lookAlong mLt (In ,2) ~?= Just (In ,1)
+                                             , lookAlong mLb (In ,2) ~?= Just (In ,1)
+                                             ]
                                      ]
                              ]
                      ]
