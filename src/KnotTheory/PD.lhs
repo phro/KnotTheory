@@ -306,14 +306,28 @@ possible for the resulting gaze to be merely the boundary, it is possible for
 these functions to return \hs{Nothing}.
 \begin{code}
 lookLeft  :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
-lookLeft = undefined
+lookLeft k di@(Out,i) = do
+        x <- findNextXing k di
+        j <- otherArc x i
+        if (underStrand x == i) == isPositive x
+         then return (In, j)
+         else sequence (Out, nextSkeletonIndex (skeleton k) j)
+lookLeft k (In,i) = sequence (Out, prevSkeletonIndex s i) >>= lookRight k 
+  where s = skeleton k
 
 lookAlong :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
 lookAlong k (Out, i) = sequence (Out, nextSkeletonIndex (skeleton k) i) 
 lookAlong k (In , i) = sequence (In , prevSkeletonIndex (skeleton k) i) 
 
 lookRight :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
-lookRight = undefined
+lookRight k di@(Out,i) = do
+        x <- findNextXing k di
+        j <- otherArc x i
+        if (underStrand x == i) == isNegative x
+         then return (In, j)
+         else sequence (Out, nextSkeletonIndex (skeleton k) j)
+lookRight k (In,i) = sequence (Out, prevSkeletonIndex s i) >>= lookLeft k 
+  where s = skeleton k
 
 findNextXing :: (Eq i, PD k) => k i -> (Dir,i) -> Maybe (Xing i)
 findNextXing k (Out,i) = find (`involves` i) $ xings k
