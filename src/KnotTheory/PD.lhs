@@ -241,42 +241,41 @@ every crossing, all the rotation numbers have been computed.
 Next, we define \hs{converge}, which iterates a function until a fixed point is
 achieved.
 \begin{code}
-converge :: (Eq a) => (a -> a) -> a -> a
+converge :: (Monad m, Eq (m a)) => (a -> m a) -> m a -> m a
 converge f x
         | x == x'   = x
         | otherwise = converge f x'
-        where x' = f x
+        where x' = x >>= f
 \end{code}
 \begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
-getRotNums k = return >>> converge (>>= advanceFront k) >>> fst
+getRotNums k = return >>> converge (advanceFront k) >>> fst
 
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
-advanceFront k = return >>> converge (>>= absorbArc k) >=> absorbXing k
+advanceFront k = return >>> converge (absorbArc k) >=> absorbXing k
 
 absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArc k []     = return []
-absorbArc k f@(f1:fs) = 
-        case fs1 of
-          ( In,i):_ -> (return (i,-1), fss)
-          (Out,i):_ -> return fss           -- No new rotation numbers
-          []        -> return f 
-          where (fs1,fss) = partition (((==) `on` snd) f1) fs
+absorbArc k f@(f1:fs) = case fs1 of
+        ( In,i):_ -> (return (i,-1), fss)
+        (Out,i):_ -> return fss           -- No new rotation numbers
+        []        -> return f 
+        where (fs1,fss) = partition (((==) `on` snd) f1) fs
 
 absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
-absorbArcs k = converge (>>= absorbArc k) . return 
+absorbArcs k = converge (absorbArc k) . return 
 
 absorbXing :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ [] = return []
-absorbXing k (f:fs) = (rs,newFront++fs)
-        where newFront = catMaybes [l, a, r]
-              l = lookLeft k f
-              a = lookAlong k f
-              r = lookRight k f
-              rs = case (l,f,r) of
-                      (Just (In,i), (Out,_),_            ) -> [(i,1)]
-                      (_          , (In ,_),Just (Out, j)) -> [(j,1)]
-                      _                                    -> [     ]
+absorbXing k (f:fs) = (rs,newFront++fs) where
+        newFront = catMaybes [l, a, r]
+        l = lookLeft k f
+        a = lookAlong k f
+        r = lookRight k f
+        rs = case (l,f,r) of
+                (Just (In,i), (Out,_),_            ) -> [(i,1)]
+                (_          , (In ,_),Just (Out, j)) -> [(j,1)]
+                _                                    -> [     ]
 
 data Dir = In | Out
   deriving (Eq, Show)

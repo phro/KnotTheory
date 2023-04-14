@@ -8,6 +8,7 @@ import KnotTheory.PD
 import KnotTheory.NamedKnots
 import KnotTheory.Tangles
 import KnotTheory.MetaHopf
+import Data.Functor.Identity
 
 assertException :: (Exception e, Eq e) => String -> e -> IO a -> IO ()
 assertException preface expected action = do
@@ -50,8 +51,8 @@ helperFunctionTests = "Helper functions" ~: TestList
       mergeBy @Int @[Int] concat [(1,[1,11,111]),(2,[2,22,222]),(1,[-1,-11])] ~?=
         [(1,[1,11,111,-1,-11]),(2,[2,22,222])]
   , "converge converges to a fixed point." ~:
-    [ converge (*0) 1 ~?= (0 :: Int)
-    , converge (\xs -> if null xs then xs else tail xs) [(1::Int)..10] ~?= []
+    [ converge @Identity (return . (*0)) (return 1) ~?= return (0 :: Int)
+    , converge @Identity (return . \xs -> if null xs then xs else tail xs) (return [(1::Int)..10]) ~?= return []
     ]
   ]
 
