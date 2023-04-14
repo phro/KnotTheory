@@ -203,6 +203,8 @@ knotObjectTests = "KnotObject operations" ~: TestList
             mSb2 = SX @Int [Strand[1],   Strand[3]] [Xm 3 1]
             pLb  = SX @Int [Loop[1,2],   Loop[3,4]] [Xp 3 1]
             mLb  = SX @Int [Loop[1,2],   Loop[3,4]] [Xm 3 1]
+            nS   = SX @Int [Strand[1]] []
+            nL   = SX @Int [Loop[1]] []
      in "look tests" ~: TestList $
              [ "lookLeft" ~: TestList $
                      [ "Out" ~: TestList $
@@ -226,6 +228,12 @@ knotObjectTests = "KnotObject operations" ~: TestList
                                              , lookLeft  mLb (Out,1) ~?= Just (Out,4)
                                              ]
                                      ]
+                             , "no next crossing" ~: TestList $
+                                     [ "with boundary arc" ~:
+                                             lookLeft nS (Out,1) ~?= Nothing
+                                     , "with new arc" ~:
+                                             lookLeft nL (Out,1) ~?= Nothing
+                                     ]
                              ]
                      , "In" ~: TestList $
                              [ "positive" ~: TestList $
@@ -247,6 +255,12 @@ knotObjectTests = "KnotObject operations" ~: TestList
                                              [ lookLeft  mLt (In ,2) ~?= Just (Out,4)
                                              , lookLeft  mLb (In ,2) ~?= Just (In ,3)
                                              ]
+                                     ]
+                             , "no next crossing" ~: TestList $
+                                     [ "with boundary arc" ~:
+                                             lookLeft nS (In ,1) ~?= Nothing
+                                     , "with new arc" ~:
+                                             lookLeft nL (In ,1) ~?= Nothing
                                      ]
                              ]
                      ]
@@ -272,6 +286,12 @@ knotObjectTests = "KnotObject operations" ~: TestList
                                              , lookRight mLb (Out,1) ~?= Just (In ,3)
                                              ]
                                      ]
+                             , "no next crossing" ~: TestList $
+                                     [ "with boundary arc" ~:
+                                             lookRight nS (Out,1) ~?= Nothing
+                                     , "with new arc" ~:
+                                             lookRight nL (Out,1) ~?= Nothing
+                                     ]
                              ]
                      , "In" ~: TestList $
                              [ "positive" ~: TestList $
@@ -293,6 +313,12 @@ knotObjectTests = "KnotObject operations" ~: TestList
                                              [ lookRight mLt (In ,2) ~?= Just (In ,3)
                                              , lookRight mLb (In ,2) ~?= Just (Out,4)
                                              ]
+                                     ]
+                             , "no next crossing" ~: TestList $
+                                     [ "with boundary arc" ~:
+                                             lookRight nS (In ,1) ~?= Nothing
+                                     , "with new arc" ~:
+                                             lookRight nL (In ,1) ~?= Nothing
                                      ]
                              ]
                      ]
@@ -318,6 +344,12 @@ knotObjectTests = "KnotObject operations" ~: TestList
                                              , lookAlong mLb (Out,1) ~?= Just (Out,2)
                                              ]
                                      ]
+                             , "no next crossing" ~: TestList $
+                                     [ "with boundary arc" ~:
+                                             lookAlong nS (Out,1) ~?= Nothing
+                                     , "with new arc" ~:
+                                             lookAlong nL (Out,1) ~?= Just (Out,1)
+                                     ]
                              ]
                      , "In" ~: TestList $
                              [ "positive" ~: TestList $
@@ -339,6 +371,12 @@ knotObjectTests = "KnotObject operations" ~: TestList
                                              [ lookAlong mLt (In ,2) ~?= Just (In ,1)
                                              , lookAlong mLb (In ,2) ~?= Just (In ,1)
                                              ]
+                                     ]
+                             , "no next crossing" ~: TestList $
+                                     [ "with boundary arc" ~:
+                                             lookAlong nS (In ,1) ~?= Nothing
+                                     , "with new arc" ~:
+                                             lookAlong nL (In ,1) ~?= Just (In ,1)
                                      ]
                              ]
                      ]
