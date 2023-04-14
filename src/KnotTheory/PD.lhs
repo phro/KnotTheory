@@ -6,6 +6,7 @@ module KnotTheory.PD where
 import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
 import Data.List (find, groupBy, sortOn, partition, intersect, union, (\\))
 import Data.Tuple (swap)
+import Data.Function (on)
 import Control.Monad ((>=>))
 import Control.Arrow ((>>>))
 \end{code}
