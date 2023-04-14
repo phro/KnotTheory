@@ -6,7 +6,6 @@ module KnotTheory.PD where
 import Data.Maybe (listToMaybe, catMaybes, mapMaybe, fromMaybe, fromJust)
 import Data.List (find, groupBy, sortOn, partition, intersect, union, (\\))
 import Data.Tuple (swap)
-import Data.Function (on)
 import Control.Monad ((>=>))
 import Control.Arrow ((>>>))
 \end{code}
@@ -268,31 +267,15 @@ absorbArcs k = converge (>>= absorbArc k) . return
 
 absorbXing :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ [] = return []
-absorbXing k ((d,i):fs) =
-  case d of
-    Out
-      | isPositive x == (i == underStrand x) ->
-        (map swap . m $ [(1,j)],m [(In,j),(d,i'),(Out,j')] ++ fs)
-      | otherwise ->
-        return $ m [(Out,j'),(d,i'),(In,j)] ++ fs
-      where
-        i' = nextSkeletonIndex s i
-        j  = otherArc x i
-        j' = j >>= nextSkeletonIndex s
-    In
-      | isPositive x == (i' == Just (overStrand x)) ->
-        (map swap . m $ [(1,j')],m [(In, j),(d,i'),(Out,j')] ++ fs)
-      | otherwise ->
-        return $ m [(Out,j'),(d,i'),(In,j)] ++ fs
-      where
-        i' = prevSkeletonIndex s i
-        j  = i' >>= otherArc x
-        j' = j  >>= nextSkeletonIndex s
-  where
-    m :: [(a,Maybe i)] -> [(a,i)]
-    m  = mapMaybe sequence
-    s  = skeleton k
-    Just x  = findNextXing k (d,i)
+absorbXing k (f:fs) = (rs,newFront++fs)
+        where newFront = catMaybes [l, a, r]
+              l = lookLeft k f
+              a = lookAlong k f
+              r = lookRight k f
+              rs = case (l,f,r) of
+                      (Just (In,i), (Out,_),_            ) -> [(i,1)]
+                      (_          , (In ,_),Just (Out, j)) -> [(j,1)]
+                      _                                    -> [     ]
 
 data Dir = In | Out
   deriving (Eq, Show)
