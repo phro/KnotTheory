@@ -247,6 +247,9 @@ converge f x
         | otherwise = converge f x'
         where x' = x >>= f
 \end{code}
+
+The implementation of \hs{getRotNums} takes a front and advances it along a
+diagram until no more changes occur.
 \begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
 getRotNums k = return >>> converge (advanceFront k) >>> fst
