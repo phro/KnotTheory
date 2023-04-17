@@ -229,9 +229,12 @@ diagram.
 This function involves taking a simple open curve (a Jordan curve passing
 through infinity) called the \hs{Front}, and passing it over arcs in the
 diagram. This curve is characterized by the arcs it passes through, together
-with their orientations.
+with their orientations. Each intersection of the \hs{Front} with the diagram
+provides a different \hs{View}, either \hs{In} or \hs{Out} of the \hs{Front}
+when following the orientation of the intersecting arc.
 \begin{code}
-type Front i = [(Dir,i)]
+type Front i = [View i]
+type View  i = (Dir, i)
 \end{code}
 We obtain the rotation numbers by successively passing the front across new
 crossings (achieved by \hs{advanceFront}), keeping track of the rotation numbers
@@ -291,7 +294,7 @@ and direction one sees when looking in the corresponding direction. Since it is
 possible for the resulting gaze to be merely the boundary, it is possible for
 these functions to return \hs{Nothing}.
 \begin{code}
-lookSide :: (Eq i, PD k) => Bool -> k i -> (Dir, i) -> Maybe (Dir, i)
+lookSide :: (Eq i, PD k) => Bool -> k i -> View i -> Maybe (View i)
 lookSide isLeft k di@(Out,i) = do
         x <- findNextXing k di
         j <- otherArc x i
@@ -301,17 +304,17 @@ lookSide isLeft k di@(Out,i) = do
 lookSide isLeft k (In,i) = sequence (Out, prevSkeletonIndex (skeleton k) i) >>=
         lookSide (not isLeft) k 
 
-lookLeft  :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
+lookLeft  :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
 lookLeft = lookSide True
 
-lookAlong :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
+lookAlong :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
 lookAlong k (Out, i) = sequence (Out, nextSkeletonIndex (skeleton k) i) 
 lookAlong k (In , i) = sequence (In , prevSkeletonIndex (skeleton k) i) 
 
-lookRight :: (Eq i, PD k) => k i -> (Dir, i) -> Maybe (Dir, i)
+lookRight :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
 lookRight = lookSide False
 
-findNextXing :: (Eq i, PD k) => k i -> (Dir,i) -> Maybe (Xing i)
+findNextXing :: (Eq i, PD k) => k i -> View i -> Maybe (Xing i)
 findNextXing k (Out,i) = find (`involves` i) $ xings k
 findNextXing k (In ,i) = do
   i' <- prevSkeletonIndex (skeleton k) i
