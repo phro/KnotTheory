@@ -256,7 +256,11 @@ diagram until no more changes occur.
 \begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
 getRotNums k = return >>> converge (advanceFront k) >>> fst
-
+\end{code}
+When advancing the \hs{Front}, we start by absorbing arcs that intersect with the
+front twice until the leftmost \hs{View} no longer connects directly back to the
+\hs{Front}. At this point, we can absorb a crossing into the front.
+\begin{code}
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront k = return >>> converge (absorbArc k) >=> absorbXing k
 
