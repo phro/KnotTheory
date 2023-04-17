@@ -263,7 +263,12 @@ front twice until the leftmost \hs{View} no longer connects directly back to the
 \begin{code}
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
 advanceFront k = return >>> converge (absorbArc k) >=> absorbXing k
-
+\end{code}
+We next check for the case where the leftmost arc connects back to the
+\hs{Front}. If it is pointing \hs{Out} (and therefore connects back \hs{In}
+further to the right), we adjust the rotation number of the arc by $-1$.
+Otherwise, we leave both the \hs{Front} and the rotation numbers unchanged.
+\begin{code}
 absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArc k []     = return []
 absorbArc k f@(f1:fs) = case fs1 of
