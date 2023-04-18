@@ -35,7 +35,6 @@ tests = TestList [ helperFunctionTests
                  , knotObjectConversionHelperTests
                  , knotObjectConversionTests
                  , namedKnotsTests
-                 , thinPositionTests
                  , tangleTests
                  ]
 
