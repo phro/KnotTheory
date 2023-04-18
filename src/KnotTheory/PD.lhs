@@ -286,6 +286,9 @@ Absorb a crossing involves expanding one's view at an arc from looking at a
 crossing to all the views one gets when looking in every direction at the
 crossing (namely, to the left, along the arc, and to the right). The function
 \hs{absorbXing} performs this task on the leftmost \hs{View} on the \hs{Front}.
+The transverse strand receives a positive rotation number if it moves from left
+to right. The arc receiving the rotation depends on how the crossing is
+oriented.
 \begin{code}
 absorbXing :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ [] = return []
