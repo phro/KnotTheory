@@ -336,16 +336,4 @@ findNextXing k (Out,i) = find (`involves` i) $ xings k
 findNextXing k (In ,i) = do
   i' <- prevSkeletonIndex (skeleton k) i
   find (`involves` i') $ xings k
-  -- (prevSkeletonIndex i $ skeleton k) >>= (\i' -> find (`involves` i') $ xings k)
-
-width :: (PD a, Eq i) => a i -> Int
-width k = maximum . map length . scanl1
-        (\is js -> (is `union` js) \\ (is `intersect` js)) .
-                map (getXingIndices (skeleton k)) $ xings k
-\end{code}
-
-Unused code
-\begin{code}
-thinPosition :: (PD a) => a i -> a i
-thinPosition = undefined
 \end{code}
