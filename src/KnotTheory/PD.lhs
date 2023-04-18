@@ -306,11 +306,15 @@ data Dir = In | Out
   deriving (Eq, Show)
 \end{code}
 
-The following functions take a location and a direction, returning the location
-and direction one sees when looking in the corresponding direction. Since it is
-possible for the resulting gaze to be merely the boundary, it is possible for
-these functions to return \hs{Nothing}.
+The following functions take a \hs{View}, returning the \hs{View} one has when
+looking in the corresponding direction. Since it is possible for the resulting
+gaze to be merely the boundary, it is possible for these functions to return
+\hs{Nothing}.
 \begin{code}
+lookAlong :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
+lookAlong k (Out, i) = sequence (Out, nextSkeletonIndex (skeleton k) i) 
+lookAlong k (In , i) = sequence (In , prevSkeletonIndex (skeleton k) i) 
+
 lookSide :: (Eq i, PD k) => Bool -> k i -> View i -> Maybe (View i)
 lookSide isLeft k di@(Out,i) = do
         x <- findNextXing k di
@@ -323,10 +327,6 @@ lookSide isLeft k (In,i) = sequence (Out, prevSkeletonIndex (skeleton k) i) >>=
 
 lookLeft  :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
 lookLeft = lookSide True
-
-lookAlong :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
-lookAlong k (Out, i) = sequence (Out, nextSkeletonIndex (skeleton k) i) 
-lookAlong k (In , i) = sequence (In , prevSkeletonIndex (skeleton k) i) 
 
 lookRight :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
 lookRight = lookSide False
