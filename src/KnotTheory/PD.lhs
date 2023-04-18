@@ -267,8 +267,6 @@ We next check for the case where the leftmost arc connects back to the
 \hs{Front}. If it is pointing \hs{Out} (and therefore connects back \hs{In}
 further to the right), we adjust the rotation number of the arc by $-1$.
 Otherwise, we leave both the \hs{Front} and the rotation numbers unchanged.
-Repeating this operation until we get a fixed point is our goal, which is
-encoded in \hs{absorbArcs}.
 \begin{code}
 absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArc k []     = return []
@@ -277,7 +275,10 @@ absorbArc k f@(f1:fs) = case fs1 of
         (Out,i):_ -> return fss           -- No new rotation numbers
         []        -> return f 
         where (fs1,fss) = partition (((==) `on` snd) f1) fs
-
+\end{code}
+Our goal is to repeat this operation until we get a fixed point, which is
+encoded in \hs{absorbArcs}:
+\begin{code}
 absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArcs k = return >>> converge (absorbArc k)
 \end{code}
