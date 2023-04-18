@@ -243,25 +243,32 @@ every crossing, all the rotation numbers have been computed.
 Next, we define \hs{converge}, which iterates a function until a fixed point is
 achieved.
 \begin{code}
-converge :: (Monad m, Eq (m a)) => (a -> m a) -> m a -> m a
+converge :: (Eq a) => (a -> a) -> a -> a
 converge f x
         | x == x'   = x
         | otherwise = converge f x'
-        where x' = x >>= f
+        where x' = f x
+\end{code}
+The function \hs{convergeT} wraps \hs{converge} in monadic transformations. In
+our context, the monad will be used to keep track of rotation numbers of the
+arcs.
+\begin{code}
+convergeT :: (Monad m, Eq (m a)) => (a -> m a) -> a -> m a
+convergeT f = return >>> converge (>>= f)
 \end{code}
 
 The implementation of \hs{getRotNums} takes a front and advances it along a
 diagram until no more changes occur.
 \begin{code}
 getRotNums :: (Eq i) => SX i -> Front i -> [(i,Int)]
-getRotNums k = return >>> converge (advanceFront k) >>> fst
+getRotNums k = convergeT (advanceFront k) >>> fst
 \end{code}
 When advancing the \hs{Front}, we start by absorbing arcs that intersect with the
 front twice until the leftmost \hs{View} no longer connects directly back to the
 \hs{Front}. At this point, we can absorb a crossing into the front.
 \begin{code}
 advanceFront :: (Eq i) => SX i -> Front i -> ([(i,Int)], Front i)
-advanceFront k = return >>> converge (absorbArc k) >=> absorbXing k
+advanceFront k = convergeT (absorbArc k) >=> absorbXing k
 \end{code}
 We next check for the case where the leftmost arc connects back to the
 \hs{Front}. If it is pointing \hs{Out} (and therefore connects back \hs{In}
@@ -280,7 +287,7 @@ Our goal is to repeat this operation until we get a fixed point, which is
 encoded in \hs{absorbArcs}:
 \begin{code}
 absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
-absorbArcs k = return >>> converge (absorbArc k)
+absorbArcs k = convergeT (absorbArc k)
 \end{code}
 
 Absorb a crossing involves expanding one's view at an arc from looking at a
