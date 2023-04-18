@@ -280,7 +280,13 @@ absorbArc k f@(f1:fs) = case fs1 of
 
 absorbArcs :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArcs k = return >>> converge (absorbArc k)
+\end{code}
 
+Absorb a crossing involves expanding one's view at an arc from looking at a
+crossing to all the views one gets when looking in every direction at the
+crossing (namely, to the left, along the arc, and to the right). The function
+\hs{absorbXing} performs this task on the leftmost \hs{View} on the \hs{Front}.
+\begin{code}
 absorbXing :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbXing _ [] = return []
 absorbXing k (f:fs) = (rs,newFront++fs) where
@@ -295,8 +301,6 @@ absorbXing k (f:fs) = (rs,newFront++fs) where
 
 data Dir = In | Out
   deriving (Eq, Show)
--- There should be cleaner functions to deal with xings and their associated
--- strands.
 \end{code}
 
 The following functions take a location and a direction, returning the location
