@@ -312,8 +312,10 @@ gaze to be merely the boundary, it is possible for these functions to return
 \hs{Nothing}.
 \begin{code}
 lookAlong :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
-lookAlong k (Out, i) = sequence (Out, nextSkeletonIndex (skeleton k) i) 
-lookAlong k (In , i) = sequence (In , prevSkeletonIndex (skeleton k) i) 
+lookAlong k (d, i) = case d of
+        Out -> sequence (Out, nextSkeletonIndex s i)
+        In  -> sequence (In , prevSkeletonIndex s i)
+        where s = skeleton k
 
 lookSide :: (Eq i, PD k) => Bool -> k i -> View i -> Maybe (View i)
 lookSide isLeft k di@(Out,i) = do
@@ -322,7 +324,8 @@ lookSide isLeft k di@(Out,i) = do
         if isLeft == ((underStrand x == i) == isPositive x)
         then return (In, j)
         else sequence (Out, nextSkeletonIndex (skeleton k) j)
-lookSide isLeft k (In,i) = sequence (Out, prevSkeletonIndex (skeleton k) i) >>=
+lookSide isLeft k (In,i) =
+        sequence (Out, prevSkeletonIndex (skeleton k) i) >>=
         lookSide (not isLeft) k 
 
 lookLeft  :: (Eq i, PD k) => k i -> View i -> Maybe (View i)
