@@ -193,16 +193,15 @@ nextSkeletonIndex s i = listToMaybe . mapMaybe (nextComponentIndex i) $ s
 
 prevSkeletonIndex :: (Eq i) => Skeleton i -> i -> Maybe i
 prevSkeletonIndex s i = listToMaybe . mapMaybe (prevComponentIndex i) $ s
-
+\end{code}
+In order to obtain all the crossing indices, we must take every combination of
+the under- and over-strands and their following indices:
+\begin{code}
 getXingIndices :: (Eq i) => Skeleton i -> Xing i -> [i]
-getXingIndices s x = catMaybes [ Just o
-                               , Just u
-                               , nextSkeletonIndex s o
-                               , nextSkeletonIndex s u
-                               ]
-                       where
-                               o = overStrand x
-                               u = underStrand x
+getXingIndices s x = catMaybes
+        [ f a | f <- [id, (>>= nextSkeletonIndex s)], a <- [o, u] ]
+        where o = return (overStrand x)
+              u = return (underStrand x)
 
 δ :: (Eq a) => a -> a -> Int
 δ x y
