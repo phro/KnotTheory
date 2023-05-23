@@ -651,7 +651,7 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
                 [ TestList $ map (\s ->
                         let
                                 rs = map (rotnum . toRVT $ s) .
-                                        strandIndices . skeleton $ s
+                                        skeletonIndices . skeleton $ s
                                 m = minimum rs
                          in -1 <= m ~?
                                  "nonusual negative kink detected:" ++ show m
@@ -659,7 +659,7 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
                 , TestList $ map (\s ->
                         let
                                 rs = map (rotnum . toRVT $ s) .
-                                        strandIndices . skeleton $ s
+                                        skeletonIndices . skeleton $ s
                                 m = maximum rs
                          in m <= 1 ~?
                                 "nonusual positive kink detected:" ++ show m

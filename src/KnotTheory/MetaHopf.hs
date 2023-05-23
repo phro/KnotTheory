@@ -23,7 +23,7 @@ type MetaHopfExpression i = [MetaHopf i]
 -- in Mathematica™. I'll just do that for now.
 
 toMetaHopfExpression :: RVT i -> MetaHopfExpression i
-toMetaHopfExpression (RVT cs xs rs) = map Unit (strandIndices cs)
+toMetaHopfExpression (RVT cs xs rs) = map Unit (skeletonIndices cs)
   ++ mapMaybe toKink rs
   ++ map toR xs
   ++ concatMap toMult cs

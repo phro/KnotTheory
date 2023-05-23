@@ -81,7 +81,7 @@ consecutive whole numbers. This is accomplised with \hs{reindex}:
 reindex :: (PD k, Functor k, Eq i) => k i -> k Int
 reindex k = fmap (fromJust . flip lookup table) k
   where
-    table = zip (strandIndices s) [1..]
+    table = zip (skeletonIndices s) [1..]
     s = skeleton k
 \end{code}
 Most importantly, we now declare that a diagram expressed in \hs{SX} form (that
@@ -134,8 +134,8 @@ toList :: Component i -> [i]
 toList (Strand is) = is
 toList (Loop is)   = is
 
-strandIndices :: Skeleton i -> [i]
-strandIndices = concatMap toList
+skeletonIndices :: Skeleton i -> [i]
+skeletonIndices = concatMap toList
 
 involves :: (Eq i) => Xing i -> i -> Bool
 x `involves` k = k `elem` [underStrand x, overStrand x]
