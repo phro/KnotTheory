@@ -3,6 +3,7 @@
 module Main where
 import Control.Exception
 import Test.HUnit
+import Data.List (nub)
 
 import KnotTheory.PD
 import KnotTheory.NamedKnots
@@ -685,6 +686,15 @@ knotObjectConversionTests = "KnotObject conversions" ~: TestList
                                 "xings do not match"
                             ) testSXs
                 ]
+        , "toRVT does not add a rotation number to initial arcs" ~: TestList $
+                map (\k ->
+                        let
+                                s = skeleton k
+                                r = toRVT k
+                                is = map (head . toList) . filter isStrand $ s
+                         in
+                                (nub . map (rotnum r)) is ~?= [0]
+                    ) testSXs
         ]
 
 namedKnotsTests :: Test
