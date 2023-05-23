@@ -40,10 +40,10 @@ underStrand (Xp _ i) = i
 underStrand (Xm _ i) = i
 \end{code}
 Next, we introduce the notion of a planar diagram, whose data is comprised of a
-collection of \hs{Strand}s and \hs{Loop}s (indexed by some type \hs{i}, typically an
-integer). The \hs{Skeleton} of a planar diagram is defined to be the
-collection of \hs{Component}s, each of which is either an open \hs{Strand} or a closed
-\hs{Loop}.
+collection of \hs{Strand}s and \hs{Loop}s (indexed by some type \hs{i},
+typically an integer). The \hs{Skeleton} of a planar diagram is defined to be
+the collection of \hs{Component}s, each of which is either an open \hs{Strand}
+or a closed \hs{Loop}.
 \begin{code}
 type Strand i = [i]
 type Loop i = [i]
