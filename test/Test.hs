@@ -628,67 +628,64 @@ knotObjectConversionHelperTests = "KnotObject conversion helper functions" ~: Te
 -- diagram, not and identical knot program. Keep this in mind if a test fails.
 knotObjectConversionTests :: Test
 knotObjectConversionTests = "KnotObject conversions" ~: TestList
-  [ "toSX . toRVT == id" ~: TestList
-    [ TestList $ map (\s -> (toSX . toRVT) s ~?= s) testSXs
-    , TestList $ map (\s -> (toSX . toRVT) s ~?= s) allKnots
-    , TestList $ map (\s -> (toSX . toRVT) s ~?= s) allLinks
-    ]
-  , "toRVT . toSX == id" ~: TestList $
-      map (\r -> (toRVT . toSX) r ~?= r) testRVTs
-  , "toSX is idempotent" ~: TestList
-      [ "toSX . toSX $ SX" ~: TestList $
-          map (\s -> (toSX . toSX) s ~?= toSX s) testSXs
-      , "toSX . toSX $ RVT" ~: TestList $
-          map (\r -> (toSX . toSX) r ~?= toSX r) testRVTs
-      ]
-  , "toRVT is idempotent" ~: TestList
-      [ "toRVT . toRVT $ RVT" ~: TestList $
-          map (\r -> (toRVT . toRVT) r ~?= toRVT r) testRVTs
-      , "toRVT . toRVT $ SX" ~: TestList $
-          map (\s -> (toRVT . toRVT) s ~?= toRVT s) testSXs
-      ]
-  , "toRVT returns classical kinks" ~: TestList $
-    [ TestList $ map (\s -> let rs = map (rotnum . toRVT $ s) .
-                                    strandIndices . skeleton $ s
+        [ "toSX . toRVT == id" ~: TestList
+                [ TestList $ map (\s -> (toSX . toRVT) s ~?= s) testSXs
+                , TestList $ map (\s -> (toSX . toRVT) s ~?= s) allKnots
+                , TestList $ map (\s -> (toSX . toRVT) s ~?= s) allLinks
+                ]
+        , "toRVT . toSX == id" ~: TestList $
+                map (\r -> (toRVT . toSX) r ~?= r) testRVTs
+        , "toSX is idempotent" ~: TestList
+                [ "toSX . toSX $ SX" ~: TestList $
+                        map (\s -> (toSX . toSX) s ~?= toSX s) testSXs
+                , "toSX . toSX $ RVT" ~: TestList $
+                        map (\r -> (toSX . toSX) r ~?= toSX r) testRVTs
+                ]
+        , "toRVT is idempotent" ~: TestList
+                [ "toRVT . toRVT $ RVT" ~: TestList $
+                        map (\r -> (toRVT . toRVT) r ~?= toRVT r) testRVTs
+                , "toRVT . toRVT $ SX" ~: TestList $
+                        map (\s -> (toRVT . toRVT) s ~?= toRVT s) testSXs
+                ]
+        , "toRVT returns classical kinks" ~: TestList $
+                [ TestList $ map (\s ->
+                        let
+                                rs = map (rotnum . toRVT $ s) .
+                                        strandIndices . skeleton $ s
                                 m = minimum rs
-       in -1 <= m ~? "nonusual negative kink detected:" ++ show m
-                     ) testSXs
-    , TestList $ map (\s -> let rs = map (rotnum . toRVT $ s) .
-                                    strandIndices . skeleton $ s
-        in let m = maximum rs
-            in m <= 1 ~? "nonusual positive kink detected:" ++ show m
-                     ) testSXs
-    ]
-  , "toSX does not change xing data of RVT" ~: TestList $
-    [ TestList $
-        map (\r -> skeleton r == (skeleton . toSX) r ~? "skeletons do not match"
-            ) testRVTs
-    , TestList $
-        map (\r -> xings r == (xings . toSX) r ~? "xings do not match"
-            ) testRVTs
-    ]
-  , "toRVT does not change xing data of SX" ~: TestList $
-    [ TestList $
-        map (\s -> (skeleton . toRVT) s == skeleton s ~? "skeletons do not match"
-            ) testSXs
-    , TestList $
-      map (\s -> (xings . toRVT) s == xings s ~? "xings do not match"
-          ) testSXs
-    ]
-  -- , "toRVT does not add a rotation number to terminal arcs" ~: TestList $
-      -- map (\s -> let
-          -- r = toRVT s
-          -- rs = rotnums r
-
-          -- getEndpointsOfSkeleton :: Skeleton a -> [a]
-          -- getEndpointsOfSkeleton = concat . map getEndpointsOfComponent
-
-          -- getEndpointsOfComponent :: Component a -> [a]
-          -- getEndpointsOfComponent (Loop   _ ) = []
-          -- getEndpointsOfComponent (Strand is) = [head is, last is]
-                  -- in True ~=? (and $ map ((== Just 0) . flip lookup rs) (getEndpointsOfSkeleton . skeleton $ r))
-          -- ) testSXs
-  ]
+                         in -1 <= m ~?
+                                 "nonusual negative kink detected:" ++ show m
+                                 ) testSXs
+                , TestList $ map (\s ->
+                        let
+                                rs = map (rotnum . toRVT $ s) .
+                                        strandIndices . skeleton $ s
+                                m = maximum rs
+                         in m <= 1 ~?
+                                "nonusual positive kink detected:" ++ show m
+                                 ) testSXs
+                ]
+        , "toSX does not change xing data of RVT" ~: TestList $
+                [ TestList $
+                        map (\r -> skeleton r == (skeleton . toSX) r ~?
+                                "skeletons do not match"
+                            ) testRVTs
+                , TestList $
+                        map (\r -> xings r == (xings . toSX) r ~?
+                                "xings do not match"
+                            ) testRVTs
+                ]
+        , "toRVT does not change xing data of SX" ~: TestList $
+                [ TestList $
+                        map (\s -> (skeleton . toRVT) s == skeleton s ~?
+                                "skeletons do not match"
+                            ) testSXs
+                , TestList $
+                        map (\s -> (xings . toRVT) s == xings s ~?
+                                "xings do not match"
+                            ) testSXs
+                ]
+        ]
 
 namedKnotsTests :: Test
 namedKnotsTests = "Named knots/ links tests" ~: TestList
