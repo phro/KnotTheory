@@ -2,7 +2,6 @@
 module Main where
 import KnotTheory.PD
 import KnotTheory.NamedKnots
-import KnotTheory.Tangles
 
 class MMA a where
   toMMA :: a -> String
@@ -71,8 +70,8 @@ toLink :: NamedKnot -> String
 toLink = toTangledObject "Link"
 
 main = let eqs = ks ++ ls
-           ks  = map (\(k,sx) ->  "toRVTs["++toKnot k++"] = "++rvts sx) namedKnots
-           ls  = map (\(l,sx) ->  "toRVTs["++toLink l++"] = "++rvts sx) namedLinks
-           rvts = toMMA . toRVTs
+           ks  = map (\(k,sx) ->  "toRVT["++toKnot k++"] = "++ mr sx) namedKnots
+           ls  = map (\(l,sx) ->  "toRVT["++toLink l++"] = "++ mr sx) namedLinks
+           mr = toMMA . toRVT . openFirstStrand
         in
            mapM_ putStrLn eqs
