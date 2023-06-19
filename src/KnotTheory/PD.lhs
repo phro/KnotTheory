@@ -231,6 +231,13 @@ diagram. This curve is characterized by the arcs it passes through, together
 with their orientations. Each intersection of the \hs{Front} with the diagram
 provides a different \hs{View}, either \hs{In} or \hs{Out} of the \hs{Front}
 when following the orientation of the intersecting arc.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/sample.png}% todo: fix
+\caption{A tangle with a front passing over it. The portion of the tangle below
+the front is in upright form.}
+\label{fig:upright_tangle_example}
+\end{figure}
 \begin{code}
 type Front i = [View i]
 type View  i = (Dir, i)
@@ -274,6 +281,13 @@ We next check for the case where the leftmost arc connects back to the
 \hs{Front}. If it is pointing \hs{Out} (and therefore connects back \hs{In}
 further to the right), we adjust the rotation number of the arc by $-1$.
 Otherwise, we leave both the \hs{Front} and the rotation numbers unchanged.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/sample.png}% todo: fix
+\caption{Example of absorbing an arc which intersects the front multiple times.
+The rotation number of the arc depends on its orientation.}
+\label{fig:drinfeld_element}
+\end{figure}
 \begin{code}
 absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
 absorbArc k []     = return []
