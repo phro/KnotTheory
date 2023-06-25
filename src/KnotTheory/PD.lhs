@@ -54,9 +54,10 @@ type Skeleton i = [Component i]
 \end{code}
 Next, we introduce the notion of a \hs{KnotObject}, which has its components
 labelled by the same type \hs{i}. We further define a function \hs{toRVT} which
-converts a generic \hs{KnotObject} into an \ac{RVT}. We call an object a
-\defi{planar diagram} (or \hs{PD}) if it has a notion of \hs{Skeleton} and a
-collection of crossings.
+converts a generic \hs{KnotObject} into an upright tangle (in this codebase,
+the term \ac{RVT} is frequently used for the notion of an upright tangle). We
+call an object a \defi{planar diagram} (or \hs{PD}) if it has a notion of
+\hs{Skeleton} and a collection of crossings.
 \begin{code}
 class KnotObject k where
   toSX  :: (Ord i) => k i -> SX i
@@ -222,7 +223,7 @@ following requirements (not expressed in the code):
         \item The diagram \hs{k} is a connected.
 \end{enumerate}
 Only in this case will the function \hs{toRVT} will then output a planar
-$(1,n)$-rotational virtual tangle which corresponds to a classical (i.e. planar)
+$(1,n)$-upright tangle which corresponds to a classical (i.e. planar)
 diagram.
 
 This function involves taking a simple open curve (a Jordan curve passing
@@ -233,7 +234,7 @@ provides a different \hs{View}, either \hs{In} or \hs{Out} of the \hs{Front}
 when following the orientation of the intersecting arc.
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/sample.png}% todo: fix
+\includegraphics{figures/upright_41_2b.pdf}
 \caption{A tangle with a front passing over it. The portion of the tangle below
 the front is in upright form.}
 \label{fig:upright_tangle_example}
@@ -283,10 +284,12 @@ further to the right), we adjust the rotation number of the arc by $-1$.
 Otherwise, we leave both the \hs{Front} and the rotation numbers unchanged.
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/sample.png}% todo: fix
+\includegraphics{figures/absorb_double_arc.pdf}
 \caption{Example of absorbing an arc which intersects the front multiple times.
-The rotation number of the arc depends on its orientation.}
-\label{fig:drinfeld_element}
+If the horizontal tangent vector points to to right, as in this picture, then
+the rotation number of the arc is decreased by $1$. Otherwise, no change in the
+rotation number is recorded.}
+\label{fig:absorb_double_arc}
 \end{figure}
 \begin{code}
 absorbArc :: (Eq i) => SX i -> Front i -> ([(i,Int)],Front i)
