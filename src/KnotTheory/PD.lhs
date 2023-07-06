@@ -236,7 +236,8 @@ when following the orientation of the intersecting arc.
 \centering
 \includegraphics{figures/upright_41_2b.pdf}
 \caption{A tangle with a front passing over it. The portion of the tangle below
-the front is in upright form.}
+the front has all crossings in upright form. All arcs fully below the front have
+an integer rotation number.}
 \label{fig:upright_tangle_example}
 \end{figure}
 \begin{code}
