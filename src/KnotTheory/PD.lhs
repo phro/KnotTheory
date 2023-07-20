@@ -53,10 +53,10 @@ type Skeleton i = [Component i]
 \end{code}
 Next, we introduce the notion of a \hs{KnotObject}, which has its components
 labelled by the same type \hs{i}. We further define a function \hs{toRVT} which
-converts a generic \hs{KnotObject} into an upright tangle (in this codebase,
-the term \ac{RVT} is frequently used for the notion of an upright tangle). We
-call an object a \defi{planar diagram} (or \hs{PD}) if it has a notion of
-\hs{Skeleton} and a collection of crossings.
+converts a generic \hs{KnotObject} into an upright tangle. (In this codebase,
+the term \defi{Rotational Virtual Tangle} is frequently used for the notion of
+an upright tangle.) We call an object a \defi{planar diagram} (or \hs{PD}) if it
+has a notion of \hs{Skeleton} and a collection of crossings.
 \begin{code}
 class KnotObject k where
   toSX  :: (Ord i) => k i -> SX i
