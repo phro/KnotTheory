@@ -220,9 +220,8 @@ following requirements (not expressed in the code):
         \item The underlying graph of \hs{k} is a planar. 
         \item The diagram \hs{k} is a connected.
 \end{enumerate}
-Only in this case will the function \hs{toRVT} will then output a planar
-$(1,n)$-upright tangle which corresponds to a classical (i.e. planar)
-diagram.
+Only in this case will the function \hs{toRVT} output a planar $(1,n)$-upright
+tangle which corresponds to a classical (i.e. planar) diagram.
 
 This function involves taking a simple open curve (a Jordan curve passing
 through infinity) called the \hs{Front}, and passing it over arcs in the
