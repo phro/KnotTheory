@@ -49,7 +49,6 @@ type Strand i = [i]
 type Loop i = [i]
 data Component i = Strand (Strand i) | Loop (Loop i)
   deriving (Eq, Show, Functor)
-
 type Skeleton i = [Component i]
 \end{code}
 Next, we introduce the notion of a \hs{KnotObject}, which has its components
@@ -67,7 +66,6 @@ class KnotObject k where
 class PD k where
   skeleton :: k i -> Skeleton i
   xings :: k i -> [Xing i]
-
 \end{code}
 The \hs{SX} form of a diagram just contains the \hs{Skeleton} and the \hs{Xing}s
 (crossings), while the \hs{RVT} form also assigns each arc an integral rotation
